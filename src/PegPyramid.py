@@ -11,7 +11,7 @@ class PegPyramid(PegBoard):
         nodes = {}
         node_dict = { node_id: PegNode(nodes, node_id, node_ids_str[index]) for index, node_id in enumerate(node_ids) }
         nodes.update(node_dict)
-        super().__init__(nodes, node_ids, node_ids_str)
+        super().__init__(node_ids, node_ids_str)
         self._rows = [
                     [ nodes[1] ],
                     [ nodes[2], nodes[3] ],

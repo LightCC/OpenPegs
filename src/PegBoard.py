@@ -1,6 +1,5 @@
 try:
     from .PegNode import PegNode
-    from .PegBoard import PegBoard
 except ImportError:
     print("\n{}: Try running `pegs` from the command line!!\nor run with `python run_pegs.py` from root directory\n".format(__file__))
     
@@ -8,29 +7,51 @@ class PegException(Exception):
     pass
 
 class PegBoard:
-    def __init__(self, nodes, node_ids, node_ids_str=None):
+    '''PegBoard is a linked list of nodes on a Peg Board
+    
+    PegBoard includes information on the board geometry of each
+    individual node where a peg can be, in addition to information
+    about how moves can happen (i.e. which nodes are adjacent,
+    and where a jump over that adjacent node will land)
+    
+    Arguments:
+       node_ids as list:
+          list of ids to use for each node that is created
+       [node_ids_str] as list:
+          list of id strings that matchs the node_ids. These will be returned when attempting to print a node. If left off or empty, the built-in string function for each id will be used instead.  
+    '''
+    def __init__(self, node_ids, node_ids_str=None):
+        # Ensure node_ids is a list
+        if not isinstance(node_ids, list):
+            raise ValueError('node_ids (arg 1) was type "{}", expected "list"'.format(type(node_ids)))
+        
         # If not provided, set node_ids_str to a list of the default string output of the node_ids list items
         if node_ids_str == None:
             node_ids_str = [str(x) for x in node_ids]
         else:
+            # if node_ids_str was given, check that it is a list
+            if not isinstance(node_ids_str, list):
+                raise ValueError('node_ids_str (arg 2) was type "{}", expected "list"'.format(type(node_ids)))
+            # if it is a list, check if all items are strings
             if not all(isinstance(x, str) for x in node_ids_str):
                 raise ValueError('if provided, all items in Arg 3, node_ids_str, "{}" list must be strings'.format(node_ids_str))
+        
+        # Ensure input args are the same length as lists
+        if len(node_ids) != len(node_ids_str):
+            raise ValueError('Length of node_ids (arg 1) [{}] does not equal length of node_ids_str (arg 2) [{}]'.format(len(node_ids), len(node_ids_str)))
+        
+        ## create the nodes list
+        nodes = {}
+        newnodes = {node_id: PegNode(nodes, node_id, node_ids_str[index]) for index, node_id in enumerate(node_ids)}
+        nodes.update(newnodes)
 
-        # Check all args for list type and equal lengths
-        args = [nodes, node_ids, node_ids_str]
-        argsstr = ['nodes', 'node_ids', 'node_ids_str']
-        required_type = [dict, list, list]
-        for index, arg in enumerate(args):
-            if not isinstance(arg, required_type[index]):
-                raise ValueError('Arg {} of {}: "{}" must be a "{}" type'.format(index + 1, len(args), argsstr[index], required_type[index]))
-            if len(nodes) != len(arg):
-                raise ValueError('Arg {} of {}: "{}" has length of {} instead of length of arg 1, the nodes list ({})'.format(index + 1, len(args), arg, len(arg), len(nodes)))
+        ## Assign all object properties        
         self._node_ids = node_ids
         self._node_ids_str = node_ids_str
         self._nodes = nodes
         
         # Setup _format_str to None so it is initialized,
-        # but need child class to handle these
+        # need child class to set this up!!
         self._format_str = None
         
     def node(self, node_id):
