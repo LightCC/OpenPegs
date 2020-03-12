@@ -48,6 +48,9 @@ class PegNode:
     def node_id_str(self):
         return self._node_id_str
     
+    def links(self):
+        return self._links
+    
     def add_link(self, adjacent_node, end_node):
         self._links.append(PegNodeLink(self, adjacent_node, end_node))
         
