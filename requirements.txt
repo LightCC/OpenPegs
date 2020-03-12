@@ -12,6 +12,7 @@ jedi==0.16.0
 lazy-object-proxy==1.4.3
 mccabe==0.6.1
 more-itertools==8.2.0
+-e git+git@github.com:LightCC/OpenPegs.git@d2b6b288ac9b2cc2684b19d106f956cfec4e3b0c#egg=OpenPegs
 packaging==20.3
 parso==0.6.2
 pickleshare==0.7.5
@@ -24,6 +25,7 @@ pyparsing==2.4.6
 pytest==5.3.5
 rope==0.16.0
 six==1.14.0
+sty==1.0.0b12
 traitlets==4.3.3
 typed-ast==1.4.1
 wcwidth==0.1.8

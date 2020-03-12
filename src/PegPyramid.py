@@ -36,10 +36,10 @@ class PegPyramid(PegBoard):
                 node_index = self._node_ids.index(node.node_id())
                 rowstr += '{{x[{node_index}]}} '.format(node_index=node_index)
             rowstr += row_center_spacing
-            rows.append(rowstr)
+            # rowstr will have one extra space at the end from the loop, strip one off
+            rows.append(rowstr[:-1])
         # Remove the final '\n' from outstr
         return '\n'.join(rows)
-    
     
     def _setup_links(self):
         self._create_link_by_id(1, 2, 4)
@@ -81,3 +81,14 @@ class PegPyramid(PegBoard):
         
     def _create_link_by_id(self, start_node_id, adjacent_node_id, end_node_id):
         self._nodes[start_node_id].add_link(self.node(adjacent_node_id), self.node(end_node_id))
+
+    def setup_game_board(self, start_node_id_str):
+        if start_node_id_str in self._node_ids_str:
+            for node in self._nodes.values():
+                if start_node_id_str != node.node_id_str():
+                    node.set_peg()
+            return True
+        else: # the node_id_str passed in was not found
+            return False
+
+            

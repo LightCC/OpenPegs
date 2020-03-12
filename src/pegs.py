@@ -4,20 +4,18 @@ except ImportError:
     print("\n{}: Try running `pegs` from the command line!!\nor run with `python run_pegs.py` from root directory\n".format(__file__))
 
 def main():
+    indent = 3
     print("Running Pegs Game...")
     pyramid = PegPyramid()
     print('\n'
-          'Nodes on board:')
-    print(pyramid.nodes_str(3))
-    print('\nNo Pegs!!')
-    print(pyramid.pegs_str(3))
+          'Game board node names, but no pegs!!')
+    print(pyramid.node_and_pegs_str(indent))
     
-    print('\nAdd a few pegs:')
-    pyramid.node(1).set_peg()
-    pyramid.node(5).set_peg()
-    pyramid.node(15).set_peg()
-    print(pyramid.pegs_str(3))
-    print('\nFull Node output:')
-    print(pyramid.full_str(3))
-    print('\nNodes and Pegs output:')
-    print(pyramid.node_and_pegs_str(3))
+    ## Setup the game board
+    valid_start_node = False
+    while valid_start_node == False:
+        start_node = input('\nStart: Which node on left should be empty? ')
+        valid_start_node = pyramid.setup_game_board(start_node)
+    print('\n'
+          'All Nodes but Start Node filled')
+    print(pyramid.node_and_pegs_str(indent))

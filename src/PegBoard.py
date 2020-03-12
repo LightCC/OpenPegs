@@ -56,9 +56,16 @@ class PegBoard:
         
     def node(self, node_id):
         return self._nodes[node_id]
-        
+    
     def nodes(self):
         return self._nodes
+
+    ## Format Strings and functions for printing Board status and other info strings.
+    # Note: Format string is set by the user/child class, the PegBoard class just fills in the information from the class object (i.e. filling in node ids, peg positions, etc.)
+    def format_str(self):
+        if self._format_str == None:
+            raise ValueError('Child Class must create _format_str variable!!')
+        return self._format_str
 
     def nodes_str(self, indent=0):
         outstr = self.format_str().format(x=self._node_ids_str)
@@ -76,20 +83,15 @@ class PegBoard:
         outstr = outstr.replace(' ', spaces)
         return self._indent_string(outstr, indent)
     
-    def node_and_pegs_str(self, indent=0):
+    def node_and_pegs_str(self, indent=0, space_between=3):
         node = self.nodes_str()
         pegs = self.pegs_str()
         nodelines = node.splitlines()
         peglines = pegs.splitlines()
-        outstr = '\n'.join([ '{} {}'.format(nodelines[index], peglines[index]) for index, _ in enumerate(nodelines) ])
+        outstr = '\n'.join([ '{}{}{}'.format(nodelines[index], ' ' * space_between, peglines[index]) for index, _ in enumerate(nodelines) ])
         return self._indent_string(outstr, indent)
     
     def _indent_string(self, text, indent):
         spaces = ' ' * indent
         outstr = ''.join([spaces + line + '\n' for line in text.splitlines()])
         return outstr[:-1]
-    
-    def format_str(self):
-        if self._format_str == None:
-            raise ValueError('Child Class must create _format_str variable!!')
-        return self._format_str
