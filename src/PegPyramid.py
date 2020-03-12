@@ -90,5 +90,28 @@ class PegPyramid(PegBoard):
             return True
         else: # the node_id_str passed in was not found
             return False
-
-            
+        
+    def valid_moves(self):
+        moves = []
+        for node in self._nodes.values():
+            for link in node.links():
+                if self.link_has_valid_jump(link):
+                    moves.append(link)
+        return moves
+                
+    def link_has_valid_jump(self, link):
+        # If start node has a peg, and adjacent node has a peg to jump, and end node is empty to land, then link is valid for a jump
+        return all( [link.start_node().peg(), link.adjacent_node().peg(), not link.end_node().peg()] )
+    
+    def execute_jump_move(self, link):
+        if self.link_has_valid_jump(link):
+            link.adjacent_node().clear_peg() # Jump over here and remove peg from board
+            link.start_node().clear_peg() # Jump from here, peg moves
+            link.end_node().set_peg() # peg lands here and fills the spot    
+        else:
+            if not link.start_node().peg():
+                raise ValueError('Link {} is not valid - No peg to jump with in start node {}'.format(link, link.start_node().node_id_str))
+            elif not link.adjacent_node().peg():
+                raise ValueError('Link {} is not valid - No peg to jump over in adjacent node {}'.format(link, link.adjacent_node().node_id_str))
+            if link.end_node().peg():
+                raise ValueError('Link {} is not valid - Peg already present in end node {}'.format(link, link.end_node().node_id_str))
