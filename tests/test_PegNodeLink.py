@@ -34,6 +34,18 @@ class TestPegNodeLink:
         with pytest.raises(ValueError):
             PegNodeLink(node1, node1, node_arg)
     
+    def test_returning_all_nodes(self):
+        # Setup
+        node1 = PegNode(None, 1)
+        node2 = PegNode(None, 2)
+        node3 = PegNode(None, 3)
+        link = PegNodeLink(node1, node2, node3)
+        
+        # Test node access methods
+        assert link.start_node() is node1
+        assert link.adjacent_node() is node2
+        assert link.end_node() is node3
+    
     def test_PegNodeLink_string_output(self):
         node1 = PegNode(None, 1)
         node2 = PegNode(None, '2')

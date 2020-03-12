@@ -23,6 +23,15 @@ class PegNodeLink:
             self._end_node = end_node
         else:
             raise ValueError('end_node must be a PegNode instance')
-            
+    
+    def start_node(self):
+        return self._start_node
+    
+    def adjacent_node(self):
+        return self._adjacent_node
+    
+    def end_node(self):
+        return self._end_node
+    
     def __str__(self):
         return '{}->{}->{}'.format(self._start_node.node_id_str(), self._adjacent_node.node_id_str(), self._end_node.node_id_str())

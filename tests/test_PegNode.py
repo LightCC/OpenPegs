@@ -98,5 +98,9 @@ class TestPegNode:
         assert node1._links[0]._end_node._parent[1] is node1
         assert node1._links[0]._end_node._parent[4] is node4
         assert len(node4._parent) == 4
-        assert len(node1._parent) == 4     
+        assert len(node1._parent) == 4
+        
+        ## Test the .links() method
+        links = node1.links()
+        assert links is node1._links
         

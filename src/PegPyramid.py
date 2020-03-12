@@ -36,10 +36,10 @@ class PegPyramid(PegBoard):
                 node_index = self._node_ids.index(node.node_id())
                 rowstr += '{{x[{node_index}]}} '.format(node_index=node_index)
             rowstr += row_center_spacing
-            rows.append(rowstr)
+            # rowstr will have one extra space at the end from the loop, strip one off
+            rows.append(rowstr[:-1])
         # Remove the final '\n' from outstr
         return '\n'.join(rows)
-    
     
     def _setup_links(self):
         self._create_link_by_id(1, 2, 4)
@@ -81,3 +81,37 @@ class PegPyramid(PegBoard):
         
     def _create_link_by_id(self, start_node_id, adjacent_node_id, end_node_id):
         self._nodes[start_node_id].add_link(self.node(adjacent_node_id), self.node(end_node_id))
+
+    def setup_game_board(self, start_node_id_str):
+        if start_node_id_str in self._node_ids_str:
+            for node in self._nodes.values():
+                if start_node_id_str != node.node_id_str():
+                    node.set_peg()
+            return True
+        else: # the node_id_str passed in was not found
+            return False
+        
+    def valid_moves(self):
+        moves = []
+        for node in self._nodes.values():
+            for link in node.links():
+                if self.link_has_valid_jump(link):
+                    moves.append(link)
+        return moves
+                
+    def link_has_valid_jump(self, link):
+        # If start node has a peg, and adjacent node has a peg to jump, and end node is empty to land, then link is valid for a jump
+        return all( [link.start_node().peg(), link.adjacent_node().peg(), not link.end_node().peg()] )
+    
+    def execute_jump_move(self, link):
+        if self.link_has_valid_jump(link):
+            link.adjacent_node().clear_peg() # Jump over here and remove peg from board
+            link.start_node().clear_peg() # Jump from here, peg moves
+            link.end_node().set_peg() # peg lands here and fills the spot    
+        else:
+            if not link.start_node().peg():
+                raise ValueError('Link {} is not valid - No peg to jump with in start node {}'.format(link, link.start_node().node_id_str))
+            elif not link.adjacent_node().peg():
+                raise ValueError('Link {} is not valid - No peg to jump over in adjacent node {}'.format(link, link.adjacent_node().node_id_str))
+            if link.end_node().peg():
+                raise ValueError('Link {} is not valid - Peg already present in end node {}'.format(link, link.end_node().node_id_str))

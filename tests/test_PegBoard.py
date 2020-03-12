@@ -45,6 +45,8 @@ class TestPegBoard:
         assert board.format_str() == test_str
         assert board.nodes_str() == (' 1 \n'
                                      '2 3')
+        assert board.nodes_str(indent=2) == ('   1 \n'
+                                             '  2 3')
         assert board.pegs_str() == (' o \n'
                                     'o o')
         
@@ -53,11 +55,16 @@ class TestPegBoard:
             node.set_peg()
         assert board.pegs_str() == (' x \n'
                                     'x x')
+        assert board.pegs_str(1) == ('  x \n'
+                                     ' x x')
         assert board.full_str() == ('   1:x   \n'
                                     '2:x   3:x')
-        assert board.node_and_pegs_str() == (' 1   x \n'
-                                             '2 3 x x')
-    
+        assert board.full_str(indent=5) == ('        1:x   \n'
+                                            '     2:x   3:x')
+        assert board.node_and_pegs_str() == (' 1     x \n'
+                                             '2 3   x x')
+        assert board.node_and_pegs_str(indent=3, space_between=0) == ('    1  x \n'
+                                             '   2 3x x')
     def test_raises_ValueError_if_format_string_is_not_set(self):
         '''Ensure a ValueError is raised if the .format_str() function is called before the ._format_str property is set by the parent
         '''
