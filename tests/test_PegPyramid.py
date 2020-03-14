@@ -14,8 +14,14 @@ class TestPegPyramid:
                                       '  o o o  \n'
                                       ' o o o o \n'
                                       'o o o o o')
-        for node_id in pyramid.nodes():
-            pyramid.node(node_id).set_peg()
+        pyramid.node(4).add_peg()
+        pyramid.node(5).add_peg()
+        assert pyramid.pegs_str() == ('    o    \n'
+                                      '   o o   \n'
+                                      '  x x o  \n'
+                                      ' o o o o \n'
+                                      'o o o o o')
+        pyramid.set_pegs(True)
         assert pyramid.pegs_str() == ('    x    \n'
                                       '   x x   \n'
                                       '  x x x  \n'
@@ -32,3 +38,21 @@ class TestPegPyramid:
                                                ' 7 8 9 a     x x x x \n'
                                                'b c d e f   x x x x x')
 
+    def test_analyze_current_game_board_runs(self):
+        pyramid = PegPyramid()
+        pyramid.analyze_current_game_board()
+        
+    def test_analyze_final_move(self):
+        """
+        Test analysis of a board with a single possible final move
+        """
+        # Setup with pegs in nodes 1 and 2
+        pyramid = PegPyramid()
+        pyramid.set_pegs(False)
+        pyramid.node(1).set_peg(True)
+        pyramid.node(2).set_peg(True)
+        # Only move left is jump 1->2->4
+        results = pyramid.analyze_current_game_board()
+        assert len(results) == 1
+        assert str(results[0]) == '1->2->4'
+        

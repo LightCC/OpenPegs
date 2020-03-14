@@ -21,7 +21,7 @@ def node_arg(request):
 
 class TestPegNodeLink:
     def test_init_raises_valueerror_if_arg_is_not_PegNode(self, node_arg):
-        node1 = PegNode(None, 1)
+        node1 = PegNode(1)
         # No Exception should be raised
         PegNodeLink(node1, node1, node1)
         # Ensure bad first arg raises ValueError
@@ -36,9 +36,9 @@ class TestPegNodeLink:
     
     def test_returning_all_nodes(self):
         # Setup
-        node1 = PegNode(None, 1)
-        node2 = PegNode(None, 2)
-        node3 = PegNode(None, 3)
+        node1 = PegNode(1)
+        node2 = PegNode(2)
+        node3 = PegNode(3)
         link = PegNodeLink(node1, node2, node3)
         
         # Test node access methods
@@ -47,8 +47,8 @@ class TestPegNodeLink:
         assert link.end_node() is node3
     
     def test_PegNodeLink_string_output(self):
-        node1 = PegNode(None, 1)
-        node2 = PegNode(None, '2')
-        node3 = PegNode(None, 3.14159)
+        node1 = PegNode(1)
+        node2 = PegNode('2')
+        node3 = PegNode(3.14159)
         link1 = PegNodeLink(node1, node2, node3)
         assert str(link1) == '1->2->3.14159'

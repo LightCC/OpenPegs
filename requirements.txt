@@ -14,7 +14,7 @@ jedi==0.16.0
 lazy-object-proxy==1.4.3
 mccabe==0.6.1
 more-itertools==8.2.0
--e git+git@github.com:LightCC/OpenPegs.git@b6d2ced4ace7a19c035c82a3995d56873e73379d#egg=OpenPegs
+# -e git+git@github.com:LightCC/OpenPegs.git@b6d2ced4ace7a19c035c82a3995d56873e73379d#egg=OpenPegs
 packaging==20.3
 parso==0.6.2
 pefile==2019.4.18

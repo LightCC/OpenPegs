@@ -6,40 +6,50 @@ except ImportError:
     
 class PegPyramid(PegBoard):
     def __init__(self):
-        node_ids = list(range(1, 16))
-        node_ids_str = [ '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' ]
-        nodes = {}
-        node_dict = { node_id: PegNode(nodes, node_id, node_ids_str[index]) for index, node_id in enumerate(node_ids) }
-        nodes.update(node_dict)
-        super().__init__(node_ids, node_ids_str)
-        self._rows = [
-                    [ nodes[1] ],
-                    [ nodes[2], nodes[3] ],
-                    [ nodes[4], nodes[5], nodes[6] ],
-                    [ nodes[7], nodes[8], nodes[9], nodes[10] ],
-                    [ nodes[11], nodes[12], nodes[13], nodes[14], nodes[15] ]
-                   ]
-        self._setup_links()
-        self._format_str = self._create_format_str()
+        nodelist = [PegNode(node_id= 1, node_id_str='1'),
+                    PegNode(node_id= 2, node_id_str='2'),
+                    PegNode(node_id= 3, node_id_str='3'),
+                    PegNode(node_id= 4, node_id_str='4'),
+                    PegNode(node_id= 5, node_id_str='5'),
+                    PegNode(node_id= 6, node_id_str='6'),
+                    PegNode(node_id= 7, node_id_str='7'),
+                    PegNode(node_id= 8, node_id_str='8'),
+                    PegNode(node_id= 9, node_id_str='9'),
+                    PegNode(node_id= 10, node_id_str='a'),
+                    PegNode(node_id= 11, node_id_str='b'),
+                    PegNode(node_id= 12, node_id_str='c'),
+                    PegNode(node_id= 13, node_id_str='d'),
+                    PegNode(node_id= 14, node_id_str='e'),
+                    PegNode(node_id= 15, node_id_str='f')]
+        super().__init__(nodelist)
+        self._setup_links() # add the valid links that are legal jumps between nodes
+        rows = [[ self.node(1) ],
+                [ self.node(2), self.node(3) ],
+                [ self.node(4), self.node(5), self.node(6) ],
+                [ self.node(7), self.node(8), self.node(9), self.node(10) ],
+                [ self.node(11), self.node(12), self.node(13), self.node(14), self.node(15) ]]
+        self._format_str = self._create_format_str(rows)
     
-    def _create_format_str(self):
+    def _create_format_str(self, rows):
         ## Create a dict of rows with their lengths
-        row_lengths = [ len(row) for row in self._rows ]
+        self._rows = rows
+        row_lengths = [ len(row) for row in rows ]
         max_nodes_in_row = max(row_lengths)
         ## Now create a string for each row and combine them
-        rows = []
-        for row in self._rows:
+        rows_str = []
+        for row in rows:
             # Center each row by adding spaces
             row_center_spacing = ' ' * (max_nodes_in_row - len(row))
             rowstr = row_center_spacing
             for node in row:
-                node_index = self._node_ids.index(node.node_id())
+                # Just in case the indexes are not deterministic, refigure them
+                node_index = self.node_ids().index(node.node_id())
                 rowstr += '{{x[{node_index}]}} '.format(node_index=node_index)
             rowstr += row_center_spacing
             # rowstr will have one extra space at the end from the loop, strip one off
-            rows.append(rowstr[:-1])
+            rows_str.append(rowstr[:-1])
         # Remove the final '\n' from outstr
-        return '\n'.join(rows)
+        return '\n'.join(rows_str)
     
     def _setup_links(self):
         self._create_link_by_id(1, 2, 4)
@@ -80,18 +90,27 @@ class PegPyramid(PegBoard):
         self._create_link_by_id(15, 14, 13)
         
     def _create_link_by_id(self, start_node_id, adjacent_node_id, end_node_id):
-        self._nodes[start_node_id].add_link(self.node(adjacent_node_id), self.node(end_node_id))
+        self.node(start_node_id).add_link(self.node(adjacent_node_id), self.node(end_node_id))
 
     def setup_game_board(self, start_node_id_str):
         if start_node_id_str in self._node_ids_str:
-            for node in self._nodes.values():
+            for node in self.nodes():
                 if start_node_id_str != node.node_id_str():
-                    node.set_peg()
+                    node.add_peg()
+                self._current_valid_moves = self._find_valid_moves()
             return True
         else: # the node_id_str passed in was not found
             return False
-        
-    def valid_moves(self):
+    
+    def current_valid_moves(self):
+        try:
+            return self._current_valid_moves
+        except AttributeError:
+            self._current_valid_moves = self._find_valid_moves()
+            return self._current_valid_moves
+    
+    def _find_valid_moves(self):
+        ## TODO: Optimize this - its a very rough brute force calculation...
         moves = []
         for node in self._nodes.values():
             for link in node.links():
@@ -105,9 +124,10 @@ class PegPyramid(PegBoard):
     
     def execute_jump_move(self, link):
         if self.link_has_valid_jump(link):
-            link.adjacent_node().clear_peg() # Jump over here and remove peg from board
-            link.start_node().clear_peg() # Jump from here, peg moves
-            link.end_node().set_peg() # peg lands here and fills the spot    
+            link.adjacent_node().remove_peg() # Jump over here and remove peg from board
+            link.start_node().remove_peg() # Jump from here, peg moves
+            link.end_node().add_peg() # peg lands here and fills the spot
+            self._current_valid_moves = self._find_valid_moves()    
         else:
             if not link.start_node().peg():
                 raise ValueError('Link {} is not valid - No peg to jump with in start node {}'.format(link, link.start_node().node_id_str))
@@ -115,3 +135,11 @@ class PegPyramid(PegBoard):
                 raise ValueError('Link {} is not valid - No peg to jump over in adjacent node {}'.format(link, link.adjacent_node().node_id_str))
             if link.end_node().peg():
                 raise ValueError('Link {} is not valid - Peg already present in end node {}'.format(link, link.end_node().node_id_str))
+
+    def analyze_current_game_board(self):
+        valid_paths = []
+        # TODO: Need to make a copy of the board, and actually complete the moves on it to find the full path.
+
+        # TODO: this will only work for a board that only has one move left...
+        if sum(self.pegs().values()) == 2:
+            return self.current_valid_moves()
