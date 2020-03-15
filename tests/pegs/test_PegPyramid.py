@@ -1,5 +1,5 @@
 import pytest
-from src.PegPyramid import PegPyramid
+from src.pegs.PegPyramid import PegPyramid
 
 class TestPegPyramid:
     def test_PegPyramid_basic_init(self):

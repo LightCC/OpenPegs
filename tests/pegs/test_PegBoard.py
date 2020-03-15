@@ -1,7 +1,7 @@
 import pytest
-from src.PegBoard import PegBoard
-from src.PegNode import PegNode
-from src.PegNodeLink import PegNodeLink
+from src.pegs.PegBoard import PegBoard
+from src.pegs.PegNode import PegNode
+from src.pegs.PegNodeLink import PegNodeLink
 
 def fake_function():
     pass

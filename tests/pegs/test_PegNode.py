@@ -1,5 +1,5 @@
 import pytest
-from src.PegNode import PegNode
+from src.pegs.PegNode import PegNode
 
 def fake_function():
     pass

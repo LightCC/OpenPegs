@@ -1,25 +1,26 @@
 import pytest
-from src.PegNodeLink import PegNodeLink
-from src.PegNode import PegNode
+from src.pegs.PegNodeLink import PegNodeLink
+from src.pegs.PegNode import PegNode
 
 def fake_function():
     pass
 
 ## supply a node_arg for instantiating PegNodeLink objects
 # that is not a PegNode object to trigger a ValueError exception
-@pytest.fixture(params=[None,
-                        1,
-                        'string',
-                        1.1,
-                        ['list', 1],
-                        {1: 'dict'},
-                        {'set', 1, 2},
-                        fake_function
-                        ])
-def node_arg(request):
-    return request.param
+# @pytest.fixture(params=[None,
+#                         1,
+#                         'string',
+#                         1.1,
+#                         ['list', 1],
+#                         {1: 'dict'},
+#                         {'set', 1, 2},
+#                         fake_function
+#                         ])
+# def node_arg_SAVE(request):
+#     return request.param
 
 class TestPegNodeLink:
+    @pytest.mark.parametrize("node_arg", [None, 1, 'string', 1.1, ['list', 1], {1: 'dict'}, {'set', 1, 2}, fake_function])
     def test_init_raises_valueerror_if_arg_is_not_PegNode(self, node_arg):
         node1 = PegNode(1)
         # No Exception should be raised
