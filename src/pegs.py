@@ -63,24 +63,22 @@ def main():
           '  You finished the game with {} remaining pegs'.format(pegs))
     if pegs >= 4:
         print('  It takes someone special to leave that many pegs on the board!!')
-        input('Press Enter to close')
     elif pegs == 3:
         print('  I can do that well with random moves!!')
-        input('Press Enter to close')
     elif pegs == 2:
         print('\n'
               '  You might be getting the hang of this!!\n'
               '  But you can still do better...')
-        input('Press Enter to close')
     elif pegs == 1:
         print('\n'
               '  What? You solved it?!\n'
               '  We worship the ground you walk on!!\n'
               '  But can you do it again...')
-        input('Press Enter to close')
     else:
         Exception('Not a possible outcome - someone cheated! (or someone didn\'t program right...)')
-        input('Press Enter to close')
+    
+    ## Pause for user to press enter, so that window will not disappear if run directly from *.exe
+    input('\n=== PRESS ENTER TO END GAME ===')
                 
 if __name__ == '__main__':
     main()
