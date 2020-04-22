@@ -94,23 +94,27 @@ class TestPegBoard:
     def test_set_pegs_with_single_value(self):
         nodelist = [ PegNode(node_id) for node_id in range(1, 16) ]
         pyramid = PegBoard(nodelist)
-        pyramid.set_pegs(False)
-        assert all([ peg == False for peg in pyramid.pegs().values() ])
         pyramid.set_pegs(True)
-        assert all([ peg == True for peg in pyramid.pegs().values() ])
+        assert all([ node.peg() == True for node in pyramid.nodes() ])
+        pyramid.set_pegs(False)
+        assert all([ node.peg() == False for node in pyramid.nodes() ])
+        pyramid.set_pegs(1)
+        assert all([ node.peg() == True for node in pyramid.nodes() ])
+        pyramid.set_pegs(0)
+        assert all([ node.peg() == False for node in pyramid.nodes() ])
         
     def test_set_pegs_with_dict(self):
         nodelist = [ PegNode(node_id) for node_id in range(1, 16) ]
         pyramid = PegBoard(nodelist)
         pegs = { node_id: True for node_id in pyramid.node_ids() }
         pyramid.set_pegs(pegs)
-        assert all([ peg == True for peg in pyramid.pegs().values() ])
+        assert all([ node.peg() == True for node in pyramid.nodes() ])
         pegs[1] = False
         pegs[4] = False
         pegs[6] = False
         pegs[15] = False
         pyramid.set_pegs(pegs)
-        pegs_list = [ peg for peg in pyramid.pegs().values() ]
+        pegs_list = [ node.peg() for node in pyramid.nodes() ]
         pegs_test = [False,
                      True, True,
                      False, True, False,
@@ -120,7 +124,7 @@ class TestPegBoard:
         ## Test setting with a list
         # Reset to all True (use 1 for fun)
         pyramid.set_pegs(1)
-        assert all([ peg == True for peg in pyramid.pegs().values() ])
+        assert all([ node.peg() == True for node in pyramid.nodes() ])
 
     def test_count_pegs(self):
         """test the .count_pegs() function
@@ -140,4 +144,4 @@ class TestPegBoard:
     def test_node_ids_str_is_correct(self):
         nodelist = [ PegNode(1), PegNode(2), PegNode(3) ]
         board = PegBoard(nodelist)
-        assert board.node_ids_str() == ['1', '2', '3']
+        assert board.node_ids_str() == {1: '1', 2: '2', 3: '3'}

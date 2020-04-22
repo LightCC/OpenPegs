@@ -56,3 +56,18 @@ class TestPegPyramid:
         assert len(results) == 1
         assert str(results[0]) == '1->2->4'
         
+    def test_board_id(self):
+        pyramid = PegPyramid()
+        assert pyramid.board_id() == 0
+        pyramid.set_pegs(True)
+        MAX_BOARD_ID = (1 << len(pyramid.node_ids())) - 1
+        assert pyramid.board_id() == MAX_BOARD_ID
+
+    def test_top_level_game_boards(self):
+        pyramid = PegPyramid()
+        boards = pyramid.all_starting_game_boards()
+        assert len(boards) == 15
+        for board in boards.values():
+            count = board.count_pegs()
+            assert count == 14
+        

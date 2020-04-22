@@ -13,13 +13,18 @@ def main():
         """
         ## Setup the game board
         new_pyramid = PegPyramid()
-        print(new_pyramid.nodes_str(indent=3))
         valid_start_node = False
         while valid_start_node == False:
-            start_node = input('\nStart: Which node on left should be empty? ')
-            valid_start_node = new_pyramid.setup_game_board(start_node)
+            print(new_pyramid.nodes_str(indent=3))
+            start_node_str = input('\nWhich position should be empty to start with? ')
+            try:
+                start_node = new_pyramid.node_from_node_id_str(start_node_str)
+                valid_start_node = new_pyramid.setup_game_board(start_node)
+            except:
+                print("\n"
+                      "Error!! Invalid Entry - must be 1-9 or a-f")
         print('\n'
-            'All Nodes but Start Node filled')
+            'All Nodes but "{}" filled with a peg. Begin!'.format(start_node_str))
         print(new_pyramid.node_and_pegs_str(indent))
         return new_pyramid
 

@@ -21,11 +21,13 @@ class PegBoard:
             raise ValueError('{} of {} items in nodes argument are not type PegNode'.format(sum(nodes_are_not_PegNode), len(nodelist)))
         
         ## create the nodes list
+        self._node_ids = []
+        self._node_ids_str = {}
         self._nodes = {}
-        newnodes = { node.node_id(): node for node in nodelist }
-        self._nodes.update(newnodes)
-        self._node_ids = [ node_id for node_id in self._nodes.keys() ]
-        for node in self.nodes():
+        for node in nodelist:
+            self._node_ids.append(node.node_id())
+            self._node_ids_str.update({ node.node_id(): node.node_id_str() })
+            self._nodes.update({ node.node_id(): node })
             node.set_parent(self)
 
         # Setup _format_str to None so it is initialized,
@@ -36,29 +38,38 @@ class PegBoard:
         return self._node_ids
 
     def node_ids_str(self):
-        try: # If not set yet, we will lazy-load
-            return self._node_ids_str
-        except AttributeError:
-            self._node_ids_str = [ node.node_id_str() for node in self.nodes() ]
-            return self._node_ids_str
+        return self._node_ids_str
+
             
     def nodes(self):
         return self._nodes.values()
 
     def node(self, node_id):
         return self._nodes[node_id]
+    
+    def node_from_node_id_str(self, node_id_str) -> PegNode:
+        """Returns the node id associated with a given node id string.
+        
+        Args:
+            node_id_str (str): a node id string that corresponds to a game board node
+            
+        Returns:
+            PegNode: the node that has the node_id_str
+        """
+        node_id = self.node_ids()[self._node_ids_str.index(node_id_str)]
+        return self.node(node_id)
 
     def pegs(self):
-        """return a dict of node_id: peg_value for each node
+        """return a dict of {node_id: peg_value} for each node
         """
-        return { node.node_id(): node.peg() for node in self.nodes() }
+        return { node_id: node.peg() for node_id, node in self._nodes.items() }
 
     def set_pegs(self, pegs):
         """set the peg value of a node (whether peg is present or not)
         
         Different from .add_peg() in that no error if there is already a peg present. Different from .remove_peg() in that no error if there is no peg to remove. It just sets the raw value.
         
-        Arguments:
+        Args:
             pegs {dict} -- each key is a node_id, value is the peg value to set for the corresponding node. If a node_id is not present, that node will not have its peg property altered.
             pegs {bool, int} -- When not a list, will assign whatever boolean value that pegs evaluates to as the pegs value of every node (all set to False or True)
         """
@@ -86,7 +97,8 @@ class PegBoard:
         return self._format_str
 
     def nodes_str(self, indent=0):
-        outstr = self.format_str().format(x=self.node_ids_str())
+        node_ids_str = [ x for x in self.node_ids_str().values() ]
+        outstr = self.format_str().format(x=node_ids_str)
         return self._indent_string(outstr, indent)
     
     def pegs_str(self, indent=0):
