@@ -4,5 +4,23 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"autoDocstring.docstringFormat": "sphinx",
+		"files.autoSave": "afterDelay",
+		"files.associations": {
+			".style.yapf": "ini"
+		},
+		"[python]": {
+			"editor.defaultFormatter": "ms-python.python"
+		},
+		"python.formatting.provider": "yapf",
+		"python.linting.mypyEnabled": true,
+		"editor.formatOnSave": true,
+		"python.testing.pytestArgs": [
+			"tests"
+		],
+		"python.testing.unittestEnabled": false,
+		"python.testing.nosetestsEnabled": false,
+		"python.testing.pytestEnabled": true
+	}
 }

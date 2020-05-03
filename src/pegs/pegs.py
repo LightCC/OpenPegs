@@ -2,9 +2,15 @@ try:
     from .PegPyramid import PegPyramid
     from .PegNodeLink import PegNodeLink
 except ImportError:
-    print("\n{}: Try running `pegs` from the command line!!\nor run with `python run_pegs.py` from root directory\n".format(__file__))
+    print("\n"  #
+        "{}: Try running `pegs` from the command line!!"  #
+        "\n"  #
+        "or run with `python run_pegs.py` from root directory\n"  #
+        .format(__file__))
+
 
 def main():
+
     def setup_new_game():
         """Create a new game board, ask user which position to leave open, and setup board
         
@@ -21,10 +27,13 @@ def main():
                 start_node = new_pyramid.node_from_node_id_str(start_node_str)
                 valid_start_node = new_pyramid.setup_game_board(start_node)
             except:
-                print("\n"
-                      "Error!! Invalid Entry - must be 1-9 or a-f")
-        print('\n'
-            'All Nodes but "{}" filled with a peg. Begin!'.format(start_node_str))
+                print( \
+                    "\n"
+                    "Error!! Invalid Entry - must be 1-9 or a-f")
+        print( \
+            '\n'
+            'All Nodes but "{}" filled with a peg. Begin!'
+            .format(start_node_str))
         print(new_pyramid.node_and_pegs_str(indent))
         return new_pyramid
 
@@ -38,23 +47,15 @@ def main():
             (result_str): result_str to print for user
         """
         remaining_pegs = game_board.count_pegs()
-        outstr = ('\n'
-                  'No moves available:\n'
-                  '\n'
-                  '  You finished the game with {} remaining pegs\n'.format(remaining_pegs))
+        outstr = ('\n' 'No moves available:\n' '\n' '  You finished the game with {} remaining pegs\n'.format(remaining_pegs))
         if remaining_pegs >= 4:
             outstr += '  It takes someone special to leave that many pegs on the board!!'
         elif remaining_pegs == 3:
             outstr += '  I can do that well with random moves!!'
         elif remaining_pegs == 2:
-            outstr += ('\n'
-                       '  You might be getting the hang of this!!\n'
-                       '  But you can still do better...')
+            outstr += ('\n' '  You might be getting the hang of this!!\n' '  But you can still do better...')
         elif remaining_pegs == 1:
-            outstr += ('\n'
-                       '  What? You solved it?!\n'
-                       '  We worship the ground you walk on!!\n'
-                       '  But can you do it again...')
+            outstr += ('\n' '  What? You solved it?!\n' '  We worship the ground you walk on!!\n' '  But can you do it again...')
         else:
             Exception('Not a possible outcome - someone cheated! (or someone didn\'t program something right...)')
         return outstr
@@ -100,15 +101,23 @@ def main():
         outstr = ''
         if command == 'analyze':
             results = pyramid.analyze_current_game_board()
-            outstr += ('\n'
-                      'Need to print results of analysis!!!\n'
-                      '\n')
+            outstr += (  #
+                '\n'
+                'Need to print results of analysis!!!\n'
+                '\n'
+            )
         elif isinstance(command, PegNodeLink):
             game_board.execute_jump_move(command)
-            outstr += ('\n  Peg in {} jumped to {}, removing {}'
-                        '\n'.format(command.start_node().node_id(),
-                                    command.end_node().node_id(),
-                                    command.adjacent_node().node_id()))
+            outstr += (  #
+                '\n'
+                '  Peg in {} jumped to {}, removing {}'
+                '\n'  #
+                .format(
+                command.start_node().node_id(),
+                command.end_node().node_id(),
+                command.adjacent_node().node_id(),
+                )
+            )
             outstr += pyramid.node_and_pegs_str(indent=3)
         else:
             raise ValueError('{} of type {} is not a valid game command'.format(command, type(command)))
@@ -123,7 +132,7 @@ def main():
     available_moves = True
     while available_moves:
         ## TODO: clean this up in the future so we don't reanalyze the moves if we didn't change the board
-        available_moves = pyramid.current_valid_moves()
+        available_moves = pyramid.valid_moves()
         ## If there are available moves, print them and have user enter a move # or a command
         if available_moves:
             print('\nValid Remaining Moves:')
@@ -135,12 +144,13 @@ def main():
                 selected_command = get_command_or_move_from_user()
             ## A valid move was picked, execute it
             print(execute_command(selected_command, game_board=pyramid))
-        else: # No moves available
+        else:  # No moves available
             valid_moves_remain = False
 
     ## No more available moves, game is done!
     print(handle_end_of_game(pyramid))
     input('\n=== PRESS ENTER TO END GAME ===')
-                
+
+
 if __name__ == '__main__':
     main()

@@ -1,4 +1,4 @@
-from src.pegs import pegs
+from src import pegs
 
 def main():
     pegs.main()
