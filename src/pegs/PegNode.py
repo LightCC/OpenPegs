@@ -1,43 +1,83 @@
 from typing import Any, List, Tuple
+from collections.abc import Hashable
+from .PegException import *
 
 try:
     from .PegNodeLink import PegNodeLink
+    from .PegNodePeg import PegNodePeg
+    from .PegNodeId import PegNodeId
 except ImportError:
     print("\n{}: Try running `pegs` from the command line!!\nor run with `python run_pegs.py` from root directory\n".format(__file__))
 
 
-class PegNodeException(Exception):
-    pass
-
-
 class PegNode:
-    """The node of a game board, linked to other nodes, that can hold a peg.
+    """The node of a game board, linked to other nodes, that can hold a peg"""
 
-    Arguments:
-        node_id {Any} -- a unique, hashable, node id for this PegNode
+    def __init__(self, node_id: int, id_str: str = None, peg_is_present: Any = False) -> None:
+        """Initialize a new PegNode
 
-    Keyword Arguments:
-        node_id_str {str} -- string format of the node_id when  printing the board (default: {''})
-        peg {bool} -- true when a peg is present in the PegNode (default: {False})
+        Args:
+            node_id (Hashable): Hashable node id for this node
+            node_id_str (str, optional): String that will print for this node. Defaults to built-in string output for the node_id.
+            peg_is_preset (bool, optional): Whether a peg is present in the node. Defaults to False.
 
-    Raises:
-        ValueError: node_id_str is not a string
-    """
-
-    def __init__(self, node_id: Any, node_id_str: str = '', peg: bool = False) -> None:
-        self._node_id = node_id
-        if node_id_str:
-            self._node_id_str = node_id_str
-        else:
-            self._node_id_str = str(node_id)
-        if not isinstance(self._node_id_str, str):
-            raise ValueError('"node_id_str" (arg 3) must be a string, it was {}'.format(type(self._node_id_str)))
+        Raises:
+            ValueError: When node_id_str is not a string
+        """
+        self._node_id = PegNodeId(node_id, id_str=id_str)
         self._parent = None
-        self._links: List[PegNodeLink] = []
-        # If peg arg evaluates to anything, set to True, else False
-        self._peg = True if peg else False
+        self.links: List[PegNodeLink] = []
+        if isinstance(peg_is_present, PegNodePeg):
+            raise ValueError("peg_is_preset must be a truthy type, not PegNodePeg")
+        self._peg = PegNodePeg(peg_is_present)
 
-    def set_parent(self, parent: Any) -> None:
+    @property
+    def node_id(self):
+        return self._node_id.value
+
+    @property
+    def node_id_str(self):
+        return str(self._node_id)
+
+    @property
+    def node_id_obj(self):
+        return self._node_id
+
+    @property
+    def peg_is_present(self):
+        return self._peg.peg
+
+    @peg_is_present.setter
+    def peg_is_present(self, peg_is_present):
+        self._peg.peg = peg_is_present
+
+    @property
+    def peg_str(self):
+        return str(self._peg)
+
+    @property
+    def peg_obj(self):
+        return self._peg
+
+    def add_peg(self):
+        try:
+            self._peg.add_peg()
+        except PegAlreadyPresent as ex:
+            raise PegAlreadyPresent('{}, at node {}'.format(ex, self.node_id))
+
+    def remove_peg(self):
+        try:
+            self._peg.remove_peg()
+        except PegNotAvailable as ex:
+            raise PegNotAvailable('{}, at node {}'.format(ex, self.node_id))
+
+    @property
+    def parent(self):
+        return self._parent
+
+    @parent.setter
+    def parent(self, parent: Any) -> None:
+        ## FIXME docstring
         """[summary]
 
         Args:
@@ -49,53 +89,29 @@ class PegNode:
         if self._parent is None:
             self._parent = parent
         else:
-            raise PegNodeException('for node(node_id={}), parent has already been set!!'.format(self.node_id()))
-
-    def parent(self):
-        return self._parent
-
-    def peg(self):
-        return self._peg
-
-    def peg_str(self):
-        return 'x' if self._peg else 'o'
-
-    def set_peg(self, peg_value: bool) -> None:
-        """Summarize something.
-
-        :param peg_value: describe a thing
-        """
-        self._peg = True if peg_value else False
-
-    def add_peg(self):
-        if self._peg:
-            raise ValueError('Peg already present at Node {}, cannot add'.format(self.node_id()))
-        else:
-            self._peg = True
-
-    def remove_peg(self):
-        if self._peg:
-            self._peg = False
-        else:
-            raise ValueError('No peg was present at Node {} to remove'.format(self.node_id()))
-
-    def node_id(self):
-        return self._node_id
-
-    def node_id_str(self):
-        return self._node_id_str
-
-    def links(self):
-        return self._links
+            raise PegNodeException('for node(node_id={}), parent has already been set!!'.format(self.node_id))
 
     def add_link(self, adjacent_node, end_node):
-        self._links.append(PegNodeLink(self, adjacent_node, end_node))
+        self.links.append(PegNodeLink(self, adjacent_node, end_node))
 
-    def __str__(self):
-        outstr = ('Node ID: {} (Type: {})\n' 'Node ID String: "{}"\n' 'Links:\n'.format(self._node_id, type(self._node_id), self._node_id_str))
-        if self.links():
-            for index, link in enumerate(self.links()):
+    def __repr__(self):
+        outstr = (  #
+            'Node ID: {}\n'
+            'Node ID String: "{}"\n'
+            'Peg Status: {}'
+            'Links:\n'  #
+            .format(
+                self.node_id.value,
+                str(self.node_id),
+                str(self._peg),
+            )
+        )
+        if self.links:
+            for index, link in enumerate(self.links):
                 outstr += '  #{}: {}\n'.format(index, link)
         else:
             outstr += '  None\n'
-        return outstr[:-1]     # Strip last '\n'
+        return outstr[:-1]  # Strip last '\n'
+
+    def __str__(self):
+        return self.node_id_str

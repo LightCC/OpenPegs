@@ -5,7 +5,7 @@
 		}
 	],
 	"settings": {
-		"autoDocstring.docstringFormat": "sphinx",
+		"autoDocstring.docstringFormat": "google",
 		"files.autoSave": "afterDelay",
 		"files.associations": {
 			".style.yapf": "ini"

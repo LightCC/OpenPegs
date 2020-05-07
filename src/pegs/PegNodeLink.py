@@ -13,26 +13,17 @@ class PegNodeLink:
         from .PegNode import PegNode
 
         if isinstance(start_node, PegNode):
-            self._start_node = start_node
+            self.start_node = start_node
         else:
             raise ValueError('start_node must be a PegNode instance')
         if isinstance(adjacent_node, PegNode):
-            self._adjacent_node = adjacent_node
+            self.adjacent_node = adjacent_node
         else:
             raise ValueError('adjacent_node must be a PegNode instance')
         if isinstance(end_node, PegNode):
-            self._end_node = end_node
+            self.end_node = end_node
         else:
             raise ValueError('end_node must be a PegNode instance')
 
-    def start_node(self):
-        return self._start_node
-
-    def adjacent_node(self):
-        return self._adjacent_node
-
-    def end_node(self):
-        return self._end_node
-
     def __str__(self):
-        return '{}->{}->{}'.format(self._start_node.node_id_str(), self._adjacent_node.node_id_str(), self._end_node.node_id_str())
+        return '{}->{}->{}'.format(self.start_node.node_id, self.adjacent_node.node_id, self.end_node.node_id)

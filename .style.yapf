@@ -138,7 +138,7 @@ coalesce_brackets=True
 # - VALIGN-RIGHT: Vertically align continuation lines to multiple of
 #   INDENT_WIDTH columns. Slightly right (one tab or a few spaces) if
 #   cannot vertically align continuation lines with indent characters.
-continuation_align_style=FIXED
+continuation_align_style=VALIGN-RIGHT
 
 # Indent width used for line continuations.
 continuation_indent_width=4
@@ -166,7 +166,7 @@ dedent_closing_brackets=True
 disable_ending_comma_heuristic=False
 
 # Place each dictionary entry onto its own line.
-each_dict_entry_on_separate_line=True
+each_dict_entry_on_separate_line=False
 
 # Require multiline dictionary even if it would normally fit on one line.
 # For example:
