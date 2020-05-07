@@ -1,5 +1,6 @@
 import pytest
 from src.pegs.PegPyramid import PegPyramid
+from src.pegs.PegNodeLink import PegNodeLink
 
 
 class TestPegPyramid:
@@ -29,7 +30,7 @@ class TestPegPyramid:
             ' o o o o \n'
             'o o o o o'
         )
-        pyramid.set_pegs(True)
+        pyramid.pegs = True
         assert pyramid.pegs_str() == (  # 
             '    x    \n'
             '   x x   \n'
@@ -63,9 +64,9 @@ class TestPegPyramid:
         """
         # Setup with pegs in nodes 1 and 2
         pyramid = PegPyramid()
-        pyramid.set_pegs(False)
-        pyramid.node(1).set_peg(True)
-        pyramid.node(2).set_peg(True)
+        pyramid.pegs = False
+        pyramid.node(1).peg_is_present = True
+        pyramid.node(2).peg_is_present = True
         # Only move left is jump 1->2->4
         results = pyramid.analyze_current_game_board()
         assert len(results) == 1
@@ -74,6 +75,25 @@ class TestPegPyramid:
     def test_board_id(self):
         pyramid = PegPyramid()
         assert pyramid.board_id() == 0
-        pyramid.set_pegs(True)
-        MAX_BOARD_ID = (1 << len(pyramid.node_ids())) - 1
+        pyramid.pegs = True
+        MAX_BOARD_ID = (1 << len(pyramid.node_ids)) - 1
         assert pyramid.board_id() == MAX_BOARD_ID
+
+    def test_executing_a_jump_move(self):
+        pyramid = PegPyramid()
+        pyramid.setup_game_board(1)
+        link_4_2_1 = PegNodeLink(pyramid.node(4), pyramid.node(2), pyramid.node(1))
+        # Jump from 4 to 1, removing 2
+        pyramid.execute_jump_move(link_4_2_1)
+        # Try to jump from 4, but no peg there
+        link_4_5_6 = PegNodeLink(pyramid.node(4), pyramid.node(5), pyramid.node(6))
+        with pytest.raises(ValueError):
+            pyramid.execute_jump_move(link_4_5_6)
+        # Try to jump 7->4->2, but no peg in 4 to jump!
+        link_7_4_2 = PegNodeLink(pyramid.node(7), pyramid.node(4), pyramid.node(2))
+        with pytest.raises(ValueError):
+            pyramid.execute_jump_move(link_7_4_2)
+        # Try to jump 7->8->9, but a peg is already in 9!
+        link_7_8_9 = PegNodeLink(pyramid.node(7), pyramid.node(8), pyramid.node(9))
+        with pytest.raises(ValueError):
+            pyramid.execute_jump_move(link_7_8_9)

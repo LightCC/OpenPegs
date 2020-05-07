@@ -58,7 +58,7 @@ class PegBoard:
     def pegs(self):
         """return a dict of {node_id: PegNodePeg object} for each node
         """
-        return {node_id: node.peg_obj for node_id, node in self._nodes.items()}
+        return {node_id: node.peg_object for node_id, node in self._nodes.items()}
 
     @pegs.setter
     def pegs(self, pegs):
@@ -81,7 +81,7 @@ class PegBoard:
         else:
             raise ValueError('Argument Pegs was type <{}>, expected dict, bool, or int'.format(type(pegs)))
 
-    def count_pegs(self):
+    def count_nodes_with_pegs(self):
         """Return the number of pegs currently in nodes on this board
         """
         return sum([node.peg_is_present for node in self.nodes])
@@ -109,7 +109,7 @@ class PegBoard:
         return self._indent_string(outstr, indent)
 
     def full_str(self, indent=0):
-        fullstr = ['{}:{}'.format(node.node_id, node.peg_str) for node in self.nodes]
+        fullstr = ['{}:{}'.format(node.node_id_str, node.peg_str) for node in self.nodes]
         outstr = self.format_str.format(x=fullstr)
         spaces = ' ' * 3
         outstr = outstr.replace(' ', spaces)

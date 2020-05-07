@@ -118,19 +118,19 @@ class TestPegBoard:
         assert all([node.peg_is_present == True for node in pyramid.nodes])
 
     def test_count_pegs(self):
-        """test the .count_pegs() function
+        """test the .count_nodes_with_pegs() function
         
-        .count_pegs() should return the number of pegs currently on the board
+        .count_nodes_with_pegs() should return the number of pegs currently on the board
         """
         nodelist = [PegNode(x) for x in [1, 2, 3, 4, 5]]
         board = PegBoard(nodelist)
-        assert board.count_pegs() == 0
+        assert board.count_nodes_with_pegs() == 0
         board.pegs = True
-        assert board.count_pegs() == 5
+        assert board.count_nodes_with_pegs() == 5
         board.node(1).remove_peg()
         board.node(4).remove_peg()
         board.node(5).remove_peg()
-        assert board.count_pegs() == 2
+        assert board.count_nodes_with_pegs() == 2
 
     def test_node_ids_str_is_correct(self):
         nodelist = [PegNode(1), PegNode(2), PegNode(3)]

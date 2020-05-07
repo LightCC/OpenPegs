@@ -3,10 +3,10 @@ try:
     from .PegNodeLink import PegNodeLink
 except ImportError:
     print("\n"  #
-        "{}: Try running `pegs` from the command line!!"  #
-        "\n"  #
-        "or run with `python run_pegs.py` from root directory\n"  #
-        .format(__file__))
+            "{}: Try running `pegs` from the command line!!"  #
+            "\n"  #
+            "or run with `python run_pegs.py` from root directory\n"  #
+            .format(__file__))
 
 
 def main():
@@ -26,7 +26,7 @@ def main():
             try:
                 start_node = new_pyramid.node_from_node_id_str(start_node_str)
                 valid_start_node = new_pyramid.setup_game_board(start_node)
-            except:
+            except Exception:
                 print( \
                     "\n"
                     "Error!! Invalid Entry - must be 1-9 or a-f")
@@ -46,7 +46,7 @@ def main():
         Returns:
             (result_str): result_str to print for user
         """
-        remaining_pegs = game_board.count_pegs()
+        remaining_pegs = game_board.count_nodes_with_pegs()
         outstr = ('\n' 'No moves available:\n' '\n' '  You finished the game with {} remaining pegs\n'.format(remaining_pegs))
         if remaining_pegs >= 4:
             outstr += '  It takes someone special to leave that many pegs on the board!!'
@@ -113,9 +113,9 @@ def main():
                 '  Peg in {} jumped to {}, removing {}'
                 '\n'  #
                 .format(
-                command.start_node().node_id(),
-                command.end_node().node_id(),
-                command.adjacent_node().node_id(),
+                    command.start_node.node_id,
+                    command.end_node.node_id,
+                    command.adjacent_node.node_id,
                 )
             )
             outstr += pyramid.node_and_pegs_str(indent=3)
@@ -140,12 +140,10 @@ def main():
                 print('  Move #{}: {}'.format(index, available_move))
             print('')
             selected_command = None
-            while selected_command == None:
+            while selected_command is None:
                 selected_command = get_command_or_move_from_user()
             ## A valid move was picked, execute it
             print(execute_command(selected_command, game_board=pyramid))
-        else:  # No moves available
-            valid_moves_remain = False
 
     ## No more available moves, game is done!
     print(handle_end_of_game(pyramid))

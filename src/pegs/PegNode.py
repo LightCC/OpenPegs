@@ -56,7 +56,7 @@ class PegNode:
         return str(self._peg)
 
     @property
-    def peg_obj(self):
+    def peg_object(self):
         return self._peg
 
     def add_peg(self):
