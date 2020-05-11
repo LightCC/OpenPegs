@@ -3,7 +3,7 @@ from src.pegs.PegPyramid import PegPyramid
 from src.pegs.PegNodeLink import PegNodeLink
 
 
-class TestPegPyramid:
+class TestPegPyramid_main_board:
 
     def test_PegPyramid_basic_init(self):
         pyramid = PegPyramid()
@@ -81,6 +81,9 @@ class TestPegPyramid:
         pyramid = PegPyramid()
         empty_board = PegPyramid.State(*([False] * 15))
         assert pyramid.board_id == empty_board
+        assert empty_board.__repr__() == (
+            'PegPyramid.State(peg_0=False, peg_1=False, peg_2=False, peg_3=False, peg_4=False, peg_5=False, peg_6=False, peg_7=False, peg_8=False, peg_9=False, peg_10=False, peg_11=False, peg_12=False, peg_13=False, peg_14=False)'
+        )
         pyramid.pegs = True
         full_board = PegPyramid.State(*([True] * 15))
         assert pyramid.board_id == full_board
@@ -123,3 +126,61 @@ class TestPegPyramid:
         link_7_8_9 = PegNodeLink(7, 8, 9)
         with pytest.raises(ValueError):
             pyramid.execute_jump_move(link_7_8_9)
+
+
+class TestPegPyramid_setup_boards:
+
+    def test_default_board(self):
+        pyr = PegPyramid()
+        for node in pyr.nodes:
+            assert pyr.peg(node) == False
+
+    @pytest.mark.parametrize(
+        'node',
+        range(15),
+    )
+    def test_setting_up_by_initial_node(self, node):
+        pyr = PegPyramid(initial_node=node)
+        for node_id in pyr.nodes:
+            if node_id == node:
+                assert pyr.peg(node_id) == False
+            else:
+                assert pyr.peg(node_id) == True
+
+    @pytest.mark.parametrize(
+        'board_id',
+        [
+            PegPyramid.State(*([False] * 15)),
+            PegPyramid.State(*([True] * 15)),
+            PegPyramid.State(*([False] * 5, [True] * 10)),
+            PegPyramid.State(*([True] * 5, [False] * 10)),
+            PegPyramid.State(False, True, False, True, False, True, *([True] * 8)),
+            PegPyramid.State(True, False, True, False, True, *([False] * 9)),
+        ],
+    )
+    def test_setting_up_by_board_id(self, board_id):
+        pyr = PegPyramid(board_id=board_id)
+        assert pyr.board_id == board_id
+        for peg, board_peg in zip(pyr.pegs.values(), board_id):
+            assert peg == board_peg
+        state = pyr.board_id
+        assert state == board_id
+
+    def test_pyramids_are_equal_by_board_id(self):
+        #First test 2 boards that are made the same way, they should be equal
+        board1 = PegPyramid.State(False, True, False, True, False, True, *([True] * 8))
+        pyr1 = PegPyramid(board_id=board1)
+        pyr1_same = PegPyramid(board_id=board1)
+        assert pyr1 == pyr1_same
+        # Change the duplicate to be different, then back again
+        pyr1_same.add_peg(2)
+        assert pyr1 != pyr1_same
+        pyr1_same.remove_peg(2)
+        assert pyr1 == pyr1_same
+        # board2 is different just by node 0 being True
+        board2 = PegPyramid.State(True, True, False, True, False, True, *([True] * 8))
+        pyr2 = PegPyramid(board_id=board2)
+        assert pyr1 != pyr2
+        # removing the peg in node 0 should make them equal
+        pyr2.remove_peg(0)
+        assert pyr1 == pyr2

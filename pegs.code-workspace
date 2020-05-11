@@ -17,7 +17,9 @@
 		"python.linting.mypyEnabled": true,
 		"editor.formatOnSave": true,
 		"python.testing.pytestArgs": [
-			"tests"
+			"./tests",
+			"--cov-report=xml:cov.xml",
+			"--cov-report=html"
 		],
 		"python.testing.unittestEnabled": false,
 		"python.testing.nosetestsEnabled": false,
@@ -27,6 +29,22 @@
 			"--follow-imports=silent",
 			"--show-column-numbers",
 			"--no-strict-optional"
-		]
-	}
+		],
+		"coverage-gutters.coverageReportFileName": "htmlcov/**/index.html",
+		"coverage-gutters.ignoredPathGlobs": "**/{node_modules,*venv,vendor}/**",
+		"coverage-gutters.highlightlight": "rgba(166, 220, 142, 0.3)",
+		"coverage-gutters.highlightdark": "rgba(45, 121, 10, 0.3)",
+		"coverage-gutters.noHighlightDark": "rgba(121, 31, 10, 0.3)",
+		"coverage-gutters.noHighlightLight": "rgba(220, 143, 143, 0.3)",
+		"coverage-gutters.partialHighlightDark": "rgba(121, 86, 10, 0.3)",
+		"coverage-gutters.partialHighlightLight": "rgba(220, 213, 143, 0.3)",
+		"coverage-gutters.showRulerCoverage": true
+	},
+	"coverage-gutters.coverageFileNames": [
+		"lcov.info",
+		"cov.xml",
+		"coverage.xml",
+		"jacoco.xml"
+	]
+	
 }

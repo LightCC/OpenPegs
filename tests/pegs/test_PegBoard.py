@@ -1,5 +1,6 @@
 import pytest
 from src.pegs.PegBoard import PegBoard
+from src.pegs.PegException import *
 
 
 @pytest.fixture()
@@ -7,9 +8,9 @@ def board6():
     nodelist = {node: str(node) for node in range(1, 7)}
     # links = [(1, 2, 3), (1, 6, 5), (3, 2, 1), (3, 4, 5), (5, 4, 3), (5, 6, 1)]
     format_str = (  #
-        "  {{x[1]}}  \n"
-        " {{x[2]}} {{x[3]}} \n"
-        "{{x[4]}} {{x[5]}} {{x[6]}}"
+        "  {x[0]}  \n"
+        " {x[1]} {x[2]} \n"
+        "{x[3]} {x[4]} {x[5]}"
     )
     yield PegBoard(nodelist, format_str)
 
@@ -19,8 +20,8 @@ def board3():
     nodelist = {node: str(node) for node in range(1, 4)}
     # links = [(1, 2, 3), (3, 1, 2), (2, 3, 1)]
     format_str = (  #
-        " {{x[1]}} \n"
-        "{{x[2]}} {{x[3]}}"
+        " {x[0]} \n"
+        "{x[1]} {x[2]}"
     )
     yield PegBoard(nodelist, format_str)
 
@@ -45,9 +46,18 @@ class TestPegBoard_Main:
         test_str = (' {x[0]} \n' '{x[1]} {x[2]}')
         board3.format_str = test_str
         assert board3.format_str == test_str
-        assert board3.nodes_string() == (' 1 \n' '2 3')
-        assert board3.nodes_string(indent=2) == ('   1 \n' '  2 3')
-        assert board3.pegs_string() == (' o \n' 'o o')
+        assert board3.nodes_string() == (  #
+            ' 1 \n'
+            '2 3'
+        )
+        assert board3.nodes_string(indent=2) == (  #
+            '   1 \n'
+            '  2 3'
+        )
+        assert board3.pegs_string() == (  #
+            ' o \n'
+            'o o'
+        )
 
         ## Set a pegs different ways in first 3 nodes
         board3.pegs = True
@@ -85,6 +95,28 @@ class TestPegBoard_Main:
         board6.pegs = 1
         for node in board6.nodes:
             assert board6.peg(node)
+
+    def test_raise_exception_on_failed_add_or_remove_peg(self, board6):
+        assert board6.count_pegs() == 0
+        with pytest.raises(PegNotAvailable):
+            board6.remove_peg(1)
+        board6.add_peg(1)
+        with pytest.raises(PegAlreadyPresent):
+            board6.add_peg(1)
+        board6.count_pegs() == 1
+        board6.remove_peg(1)
+
+    def test_set_add_remove_pegs_with_node_str(self, board6):
+        assert board6.count_pegs() == 0
+        assert board6.peg(1) == False
+        board6._set_peg('1', True)
+        assert board6.peg('1') == True
+        board6.remove_peg('1')
+        assert board6.peg('1') == False
+        assert board6.peg_str('1') == 'o'
+        board6.add_peg('1')
+        assert board6.peg('1') == True
+        assert board6.peg_str('1') == 'x'
 
     def test_count_pegs(self, board6):
         """test the .count_pegs() function
@@ -142,3 +174,14 @@ class TestPegBoard_Main:
         assert board6.peg_str(3) == 'o'
         board6._set_peg(3, True)
         assert board6.peg_str(3) == 'x'
+
+
+class TestPegBoard_FormatStr:
+
+    def test_format_str_basic(self):
+        nodes = {1: '1', 2: 'b', 3: '%'}
+        rows = [[1], [2, 3]]
+        format_str = PegBoard._create_format_str(nodes, rows)
+        assert format_str == ' {x[0]} \n{x[1]} {x[2]}'
+        board = PegBoard(nodes, format_str)
+        assert board.nodes_string() == ' 1 \nb %'

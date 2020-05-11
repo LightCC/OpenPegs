@@ -24,7 +24,7 @@ class PegPyramid(PegBoard):
         peg_14: int = False
 
         def __repr__(self):
-            outstr = ("PegPyramid(" + ", ".join([f'{name}={val}' for name, val in zip(self.__dict__)]) + ")")
+            outstr = ('PegPyramid.State(' + ', '.join([f'{fld}={val}' for fld, val in zip(self._fields, self)]) + ')')
             return outstr
 
     NODES = {
@@ -128,9 +128,9 @@ class PegPyramid(PegBoard):
         '{x[10]} {x[11]} {x[12]} {x[13]} {x[14]}'
     )
 
-    def __init__(self, initial_node: int = 0, board_id: State = None):
+    def __init__(self, initial_node: int = None, board_id: State = None):
         PegBoard.__init__(self, self.NODES, self._FORMAT_STR)
-        if initial_node:
+        if initial_node is not None:
             if not isinstance(initial_node, int):
                 raise ValueError(f'initial_node ({initial_node}) must be an integer (was {type(initial_node)}')
             self.setup_game_board_from_initial_node(initial_node)

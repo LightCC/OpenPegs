@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, TypeVar
 from .PegException import *
 
 
@@ -23,7 +23,7 @@ class PegBoard:
             rows (List[List,int]): List of rows, each is a list of Node IDs in that row
 
         Returns:
-            str: The format string with "{{x[node]}}" in place of each node, where it will be shown in a printout using other functions like nodes_string, pegs_string, full_string, etc.
+            str: The format string with "{{x[index]}}" in place of each node, where index is the index into the nodes list (i.e. it starts at 0 whether the ndoes do or not and increments by 1 per node) will be shown in a printout using other functions like nodes_string, pegs_string, full_string, etc.
         """
         ## Create a dict of rows with their lengths
         row_lengths = [len(row) for row in rows]
@@ -105,13 +105,19 @@ class PegBoard:
         """
         return sum([peg for peg in self._pegs.values()])
 
-    def peg(self, node: int):
+    def peg(self, node):
+        if isinstance(node, str):
+            node = self.node_from_node_str(node)
         return self.pegs[node]
 
     def peg_str(self, node):
+        if isinstance(node, str):
+            node = self.node_from_node_str(node)
         return 'x' if self.peg(node) else 'o'
 
-    def _set_peg(self, node: int, is_present: bool):
+    def _set_peg(self, node, is_present: bool):
+        if isinstance(node, str):
+            node = self.node_from_node_str(node)
         self._pegs[node] = is_present
 
     def add_peg(self, node):
@@ -123,13 +129,15 @@ class PegBoard:
             self._set_peg(node, True)
 
     def remove_peg(self, node):
+        if isinstance(node, str):
+            node = self.node_from_node_str(node)
         if not self.peg(node):
             raise PegNotAvailable(f'Peg not available at node "{self.node_str(node)}" to remove')
         else:
             self._set_peg(node, False)
 
     def nodes_string(self, indent=0):
-        outstr = self.format_str.format(x=self._nodes_str)
+        outstr = self.format_str.format(x=[node_str for node_str in self._nodes_str.values()])
         return self._indent_string(outstr, indent)
 
     def pegs_string(self, indent=0):
