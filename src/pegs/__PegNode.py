@@ -1,35 +1,23 @@
 from typing import Any, List, Tuple
-from collections.abc import Hashable
+from .PegNodeId import PegNodeId
 from .PegException import *
-
-try:
-    from .PegNodeLink import PegNodeLink
-    from .PegNodePeg import PegNodePeg
-    from .PegNodeId import PegNodeId
-except ImportError:
-    print("\n{}: Try running `pegs` from the command line!!\nor run with `python run_pegs.py` from root directory\n".format(__file__))
+from .PegNodeLink import PegNodeLink
+from .PegNodePeg import PegNodePeg
 
 
 class PegNode:
     """The node of a game board, linked to other nodes, that can hold a peg"""
 
-    def __init__(self, node_id: int, id_str: str = None, peg_is_present: Any = False) -> None:
+    def __init__(self, node_id: int) -> None:
         """Initialize a new PegNode
 
         Args:
-            node_id (Hashable): Hashable node id for this node
-            node_id_str (str, optional): String that will print for this node. Defaults to built-in string output for the node_id.
-            peg_is_preset (bool, optional): Whether a peg is present in the node. Defaults to False.
+            node_id (int): Node id for this node
 
         Raises:
             ValueError: When node_id_str is not a string
         """
-        self._node_id = PegNodeId(node_id, id_str=id_str)
-        self._parent = None
-        self.links: List[PegNodeLink] = []
-        if isinstance(peg_is_present, PegNodePeg):
-            raise ValueError("peg_is_preset must be a truthy type, not PegNodePeg")
-        self._peg = PegNodePeg(peg_is_present)
+        self._node_id = node_id
 
     @property
     def node_id(self):
@@ -93,6 +81,19 @@ class PegNode:
 
     def add_link(self, adjacent_node, end_node):
         self.links.append(PegNodeLink(self, adjacent_node, end_node))
+
+    def __eq__(self, other):
+        if not all(
+                self.node_id == other.node_id,
+                self.node_id_str == other.node_id_str,
+                self.peg_is_present == other.peg_is_present,
+                id(self.parent) == id(other.parent),
+        ):
+            return False
+        for link1, link2 in zip(self.links, other.links):
+            if not link1.link_id == link2.link_id:
+                return False
+        return True
 
     def __repr__(self):
         outstr = (  #

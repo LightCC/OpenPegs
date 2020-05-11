@@ -1,29 +1,18 @@
-class PegNodeLink:
+from typing import NamedTuple
+
+class PegNodeLink(NamedTuple):
     '''PegNodeLink objects provide mapping of legal jumps from a PegNode
-    
+
     When jumping, a PegNodeLink provides the start_node that a peg is currently located at, an adjacent_node that can be jumped over (if a peg is at that location), and an end_node (which must be empty) for the peg to land at after jumping.
-    
+
     Arguments:
-      start_node(PegNode): Beginning Node Position
-      adjacent_node(PegNode): Adjacent Node that will be jumped over
-      end_node(PegNode): Ending Node that will be jumped to
+      start(int): Beginning Node Position
+      adjacent(int): Adjacent Node that will be jumped over
+      end(int): Ending Node that will be jumped to
     '''
+    start: int
+    adjacent: int
+    end: int
 
-    def __init__(self, start_node, adjacent_node, end_node):
-        from .PegNode import PegNode
-
-        if isinstance(start_node, PegNode):
-            self.start_node = start_node
-        else:
-            raise ValueError('start_node must be a PegNode instance')
-        if isinstance(adjacent_node, PegNode):
-            self.adjacent_node = adjacent_node
-        else:
-            raise ValueError('adjacent_node must be a PegNode instance')
-        if isinstance(end_node, PegNode):
-            self.end_node = end_node
-        else:
-            raise ValueError('end_node must be a PegNode instance')
-
-    def __str__(self):
-        return '{}->{}->{}'.format(self.start_node.node_id, self.adjacent_node.node_id, self.end_node.node_id)
+    def __repr__(self):
+        return f'{self.start}->{self.adjacent}->{self.end}'

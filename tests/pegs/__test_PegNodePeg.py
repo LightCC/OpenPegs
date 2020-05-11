@@ -7,10 +7,10 @@ class TestPegNodePeg:
 
     def test_create_peg_object(self):
         peg_default = PegNodePeg()
-        assert peg_default.peg == False
+        assert peg_default.is_present == False
         assert str(peg_default) == 'o'
         peg_true = PegNodePeg(True)
-        assert peg_true.peg == True
+        assert peg_true.is_present == True
         assert str(peg_true) == 'x'
 
     def test_set_and_remove_pegs(self):

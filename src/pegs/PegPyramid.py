@@ -1,160 +1,174 @@
-from typing import List
-
-try:
-    from .PegNode import PegNode
-    from .PegBoard import PegBoard
-    from .PegNodeLink import PegNodeLink
-except ImportError:
-    print(  #
-        "\n"
-        "{}: Try running `pegs` from the command line!!"
-        "\n"
-        "or run with `python run_pegs.py` from root directory"
-        "\n"  #
-        .format(__file__)
-    )
+from typing import List, NamedTuple
+from .PegBoard import PegBoard
+from .PegNodeLink import PegNodeLink
+from collections import namedtuple
 
 
 class PegPyramid(PegBoard):
 
-    def __init__(self):
+    class State(NamedTuple):
+        peg_0: int = False
+        peg_1: int = False
+        peg_2: int = False
+        peg_3: int = False
+        peg_4: int = False
+        peg_5: int = False
+        peg_6: int = False
+        peg_7: int = False
+        peg_8: int = False
+        peg_9: int = False
+        peg_10: int = False
+        peg_11: int = False
+        peg_12: int = False
+        peg_13: int = False
+        peg_14: int = False
 
-        def _setup_links(self):
-            self._create_link_by_id(1, 2, 4)
-            self._create_link_by_id(1, 3, 6)
-            self._create_link_by_id(2, 4, 7)
-            self._create_link_by_id(2, 5, 9)
-            self._create_link_by_id(3, 5, 8)
-            self._create_link_by_id(3, 6, 10)
-            self._create_link_by_id(4, 2, 1)
-            self._create_link_by_id(4, 5, 6)
-            self._create_link_by_id(4, 7, 11)
-            self._create_link_by_id(4, 8, 13)
-            self._create_link_by_id(5, 8, 12)
-            self._create_link_by_id(5, 9, 14)
-            self._create_link_by_id(6, 3, 1)
-            self._create_link_by_id(6, 5, 4)
-            self._create_link_by_id(6, 9, 13)
-            self._create_link_by_id(6, 10, 15)
-            self._create_link_by_id(7, 4, 2)
-            self._create_link_by_id(7, 8, 9)
-            self._create_link_by_id(8, 5, 3)
-            self._create_link_by_id(8, 9, 10)
-            self._create_link_by_id(9, 5, 2)
-            self._create_link_by_id(9, 8, 7)
-            self._create_link_by_id(10, 6, 3)
-            self._create_link_by_id(10, 9, 8)
-            self._create_link_by_id(11, 7, 4)
-            self._create_link_by_id(11, 12, 13)
-            self._create_link_by_id(12, 8, 5)
-            self._create_link_by_id(12, 13, 14)
-            self._create_link_by_id(13, 8, 4)
-            self._create_link_by_id(13, 9, 6)
-            self._create_link_by_id(13, 12, 11)
-            self._create_link_by_id(13, 14, 15)
-            self._create_link_by_id(14, 9, 5)
-            self._create_link_by_id(14, 13, 12)
-            self._create_link_by_id(15, 10, 6)
-            self._create_link_by_id(15, 14, 13)
+        def __repr__(self):
+            outstr = ("PegPyramid(" + ", ".join([f'{name}={val}' for name, val in zip(self.__dict__)]) + ")")
+            return outstr
 
-        _nodelist = [
-            PegNode(1, id_str='1'),
-            PegNode(2, id_str='2'),
-            PegNode(3, id_str='3'),
-            PegNode(4, id_str='4'),
-            PegNode(5, id_str='5'),
-            PegNode(6, id_str='6'),
-            PegNode(7, id_str='7'),
-            PegNode(8, id_str='8'),
-            PegNode(9, id_str='9'),
-            PegNode(10, id_str='a'),
-            PegNode(11, id_str='b'),
-            PegNode(12, id_str='c'),
-            PegNode(13, id_str='d'),
-            PegNode(14, id_str='e'),
-            PegNode(15, id_str='f'),
-        ]
-        super().__init__(_nodelist)
-        _setup_links(self)  # add the valid links that are legal jumps between nodes
-        rows = [
-            [self.node(1)],
-            [self.node(2), self.node(3)],
-            [self.node(4), self.node(5), self.node(6)],
-            [self.node(7), self.node(8), self.node(9), self.node(10)],
-            [self.node(11), self.node(12), self.node(13), self.node(14), self.node(15)],
-        ]
-        self.format_str = self._create_format_str(rows)
-        self._valid_moves = None
+    NODES = {
+        0: '0',
+        1: '1',
+        2: '2',
+        3: '3',
+        4: '4',
+        5: '5',
+        6: '6',
+        7: '7',
+        8: '8',
+        9: '9',
+        10: 'a',
+        11: 'b',
+        12: 'c',
+        13: 'd',
+        14: 'e',
+    }
+    LINKS = {
+        0: [
+            PegNodeLink(0, 2, 5),
+            PegNodeLink(0, 1, 3),
+            PegNodeLink(0, 2, 5),
+        ],
+        1: [
+            PegNodeLink(1, 3, 6),
+            PegNodeLink(1, 4, 8),
+        ],
+        2: [
+            PegNodeLink(2, 4, 7),
+            PegNodeLink(2, 5, 9),
+        ],
+        3: [
+            PegNodeLink(3, 1, 0),
+            PegNodeLink(3, 4, 5),
+            PegNodeLink(3, 6, 10),
+            PegNodeLink(3, 7, 12),
+        ],
+        4: [
+            PegNodeLink(4, 7, 11),
+            PegNodeLink(4, 8, 13),
+        ],
+        5: [
+            PegNodeLink(5, 2, 0),
+            PegNodeLink(5, 4, 3),
+            PegNodeLink(5, 8, 12),
+            PegNodeLink(5, 9, 14),
+        ],
+        6: [
+            PegNodeLink(6, 3, 1),
+            PegNodeLink(6, 7, 8),
+        ],
+        7: [
+            PegNodeLink(7, 4, 2),
+            PegNodeLink(7, 8, 9),
+        ],
+        8: [
+            PegNodeLink(8, 4, 1),
+            PegNodeLink(8, 7, 6),
+        ],
+        9: [
+            PegNodeLink(9, 5, 2),
+            PegNodeLink(9, 8, 7),
+        ],
+        10: [
+            PegNodeLink(10, 6, 3),
+            PegNodeLink(10, 11, 12),
+        ],
+        11: [
+            PegNodeLink(11, 7, 4),
+            PegNodeLink(11, 12, 13),
+        ],
+        12: [
+            PegNodeLink(12, 7, 3),
+            PegNodeLink(12, 8, 5),
+            PegNodeLink(12, 11, 10),
+            PegNodeLink(12, 13, 14),
+        ],
+        13: [
+            PegNodeLink(13, 8, 4),
+            PegNodeLink(13, 12, 11),
+        ],
+        14: [
+            PegNodeLink(14, 9, 5),
+            PegNodeLink(14, 13, 12),
+        ],
+    }
+    ROWS = [
+        [0],
+        [1, 2],
+        [3, 4, 5],
+        [6, 7, 8, 9],
+        [10, 11, 12, 13, 14],
+    ]
+    _FORMAT_STR = (  #
+        '    {x[0]}    \n'
+        '   {x[1]} {x[2]}   \n'
+        '  {x[3]} {x[4]} {x[5]}  \n'
+        ' {x[6]} {x[7]} {x[8]} {x[9]} \n'
+        '{x[10]} {x[11]} {x[12]} {x[13]} {x[14]}'
+    )
+
+    def __init__(self, initial_node: int = 0, board_id: State = None):
+        PegBoard.__init__(self, self.NODES, self._FORMAT_STR)
+        if initial_node:
+            if not isinstance(initial_node, int):
+                raise ValueError(f'initial_node ({initial_node}) must be an integer (was {type(initial_node)}')
+            self.setup_game_board_from_initial_node(initial_node)
+        elif board_id:
+            if not isinstance(board_id, self.State):
+                raise ValueError(f'board_id type must be State(NamedTuple), was {type(board_id)}')
+            self.board_id = board_id
+            self._valid_moves = self._find_valid_moves()
+        else:
+            self._valid_moves = None
+
+    def __str__(self):
+        return self.pegs_string()
 
     def __eq__(self, other):
-        v1 = vars(self)
-        v2 = vars(other)
-        if not (v1.keys() == v2.keys()):
-            return False
-        # for index, var in enumerate(self.__dict__):
-        #     if not (var == other.__dict__[index]):
-        #         return False
-        return True
+        if not isinstance(self, PegPyramid) or not isinstance(other, PegPyramid):
+            return NotImplemented
+        return self.board_id == other.board_id
 
-    def _create_format_str(
-        self,
-        rows: List[list],  # game board rows, with each row a list of nodes
-    ) -> str:  # the layout format str for the board, with {x[index]} at each node location
-        """Create the format string for PegPyramid, that is used to print the game board"""
-        ## Create a dict of rows with their lengths
-        self._rows = rows
-        row_lengths = [len(row) for row in rows]
-        max_nodes_in_row = max(row_lengths)
-        ## Now create a string for each row and combine them
-        rows_str = []
-        for row in rows:
-            # Center each row by adding spaces
-            row_center_spacing = ' ' * (max_nodes_in_row - len(row))
-            rowstr = row_center_spacing
-            for node in row:
-                # Just in case the indexes are not deterministic, refigure them
-                node_index = self.node_ids.index(node.node_id)
-                rowstr += '{{x[{node_index}]}} '.format(node_index=node_index)
-            rowstr += row_center_spacing
-            # rowstr will have one extra space at the end from the loop, strip one off
-            rows_str.append(rowstr[:-1])
-            # Remove the final '\n' from outstr
-        return '\n'.join(rows_str)
-
-    def _create_link_by_id(self, start_node_id, adjacent_node_id, end_node_id) -> None:
-        self.node(start_node_id).add_link(self.node(adjacent_node_id), self.node(end_node_id))
-
-    def setup_game_board(self, start_node) -> bool:
+    def setup_game_board_from_initial_node(self, start_node) -> None:
         """Adds pegs to all positions except the given starting node
         
         Args:
-            start_node (PegNode): the starting node on the game board.
-            start_node (int): a PegNodeId for the starting node
-            start_node (str): a PegNodeId string for the starting node
-        
+            start_node (int, str): the starting node on the game board as either a node_id or the string of a node_id
         Raises:
-            ValueError: start_node is not a PegNode object
             AttributeError: start_node is not a node in this game board
-        
-        Returns:
-            bool: True when board has been setup
         """
         if isinstance(start_node, str):
-            start_node = self.node_from_node_id_str(start_node)
-        elif start_node in self.node_ids:
-            start_node = self.node(start_node)
-        if not isinstance(start_node, PegNode):
-            ValueError("{} is not a PegNode instance".format(start_node))
-        if start_node in self.nodes:
-            for node in self.nodes:
-                # add a peg if this is not the starting node
-                if start_node != node:
-                    node.add_peg()
-                self._valid_moves = self._find_valid_moves()
-            return True
+            start_node = self.node_from_node_str(start_node)
+        if start_node in self.NODES:
+            for node in self.NODES:
+                peg = not (start_node == node)
+                self._set_peg(node, peg)
+            self._valid_moves = self._find_valid_moves()
         else:
             raise AttributeError("{} is not a node in the GameBoard")
 
+    @property
     def valid_moves(self):
         if self._valid_moves is None:
             self._valid_moves = self._find_valid_moves()
@@ -163,76 +177,57 @@ class PegPyramid(PegBoard):
     def _find_valid_moves(self):
         ## TODO: Optimize this - its a very rough brute force calculation...
         moves = []
-        for node in self.nodes:
-            for link in node.links:
+        for node in self.NODES:
+            for link in self.LINKS[node]:
                 if self.link_has_valid_jump(link):
                     moves.append(link)
         return moves
 
     def link_has_valid_jump(self, link):
         # If start node has a peg, and adjacent node has a peg to jump, and end node is empty to land, then link is valid for a jump
-        return all([  #
-            link.start_node.peg_is_present,
-            link.adjacent_node.peg_is_present,
-            not link.end_node.peg_is_present,
+        return all([
+            self.peg(link.start),
+            self.peg(link.adjacent),
+            not self.peg(link.end),
         ])
 
     def execute_jump_move(self, link):
         if self.link_has_valid_jump(link):
-            link.adjacent_node.remove_peg()  # Jump over here and remove peg from board
-            link.start_node.remove_peg()  # Jump from here, peg moves
-            link.end_node.add_peg()  # peg lands here and fills the spot
+            self.remove_peg(link.adjacent)  # Jump over here and remove peg from board
+            self.remove_peg(link.start)  # Jump from here, peg moves
+            self.add_peg(link.end)  # peg lands here and fills the spot
             self._valid_moves = self._find_valid_moves()
         else:
-            if not link.start_node.peg_is_present:
-                raise ValueError(  #
-                    'Link {} is not valid - No peg to jump with in start node {}'  #
-                    .format(link, link.start_node.node_id_str)
-                )
-            elif not link.adjacent_node.peg_is_present:
-                raise ValueError(  #
-                    'Link {} is not valid - No peg to jump over in adjacent node {}'  #
-                    .format(link, link.adjacent_node.node_id_str)
-                )
-            if link.end_node.peg_is_present:
-                raise ValueError(  #
-                    'Link {} is not valid - Peg already present in end node {}'  #
-                    .format(link, link.end_node.node_id_str)
-                )
+            if not self.peg(link.start):
+                raise ValueError(f'Link {link} is not valid - No peg to jump with in start node {link.start}')
+            if not self.peg(link.adjacent):
+                raise ValueError(f'Link {link} is not valid - No peg to jump over in adjacent node {link.adjacent}')
+            if self.peg(link.end):
+                raise ValueError(f'Link {link} is not valid - Peg already present in end node {link.end}')
 
+    @property
     def board_id(self):
         """board_id provides a unique id for this board based on the current game board status
         
         board_id can be used to recreate the current board state, as a shorthand way of saving the board status, or determining if this board_state is already in the analysis database
         """
-        pegs = self.pegs
-        board_id = 0
-        for index, peg in enumerate(pegs.values()):
-            if peg.peg:
-                board_id += (1 << index)
+        board_id = self.State(*[self.peg(node) for node in self.pegs])
         return board_id
 
-    def set_to_board_id(self, board_id):
-        temp_board_id = board_id
-        pegs = {}
-        max_index = len(self.node_ids) - 1
-        for index, node_id in enumerate(reversed(self.node_ids)):
-            reversed_index = max_index - index
-            value_of_this_node_id = (1 << reversed_index)
-            if temp_board_id >= (value_of_this_node_id):
-                temp_board_id -= value_of_this_node_id
-                pegs.update({node_id: True})
-            else:
-                pegs.update({node_id: False})
-        self.pegs = pegs
+    @board_id.setter
+    def board_id(self, value):
+        if not isinstance(value, self.State):
+            raise ValueError(f"board_id must be a State(NamedTuple), (was {type(value)})")
+        for node, peg in zip(self.NODES, value):
+            self._set_peg(node, peg)
 
     def analyze_current_game_board(self) -> List[PegNodeLink]:
-        valid_paths: List[PegNodeLink] = []
+        valid_moves: List[PegNodeLink] = []
         # TODO: Need to make a copy of the board, and actually complete the moves on it to find the full path.
 
         # TODO: this will only work for a board that only has one move left...
-        if self.count_nodes_with_pegs() == 2:
-            return self.valid_moves()
+        if self.count_pegs() == 2:
+            return self.valid_moves
         else:
             ## return an empty list if we couldn't analyze the board
             return []

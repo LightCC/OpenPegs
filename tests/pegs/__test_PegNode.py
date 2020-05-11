@@ -1,6 +1,8 @@
 import pytest
 from src.pegs.PegNode import PegNode
+from src.pegs.PegNodeId import PegNodeId
 from src.pegs.PegNodePeg import PegNodePeg
+from src.pegs.PegNodeLink import PegNodeLink
 from src.pegs.PegException import PegAlreadyPresent, PegNotAvailable
 
 
