@@ -1,0 +1,2 @@
+[tool:pytest]
+addopts = --cov=src.pegs --cov-report=xml:cov.xml
