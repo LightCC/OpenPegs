@@ -105,6 +105,7 @@ class TestPegBoard_Main:
             board6.add_peg(1)
         board6.count_pegs() == 1
         board6.remove_peg(1)
+        board6.count_pegs() == 0
 
     def test_set_add_remove_pegs_with_node_str(self, board6):
         assert board6.count_pegs() == 0

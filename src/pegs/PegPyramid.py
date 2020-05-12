@@ -23,8 +23,12 @@ class PegPyramid(PegBoard):
         peg_13: int = False
         peg_14: int = False
 
+        @property
+        def count(self):
+            return sum(self)
+            
         def __repr__(self):
-            outstr = ('PegPyramid.State(' + ', '.join([f'{fld}={val}' for fld, val in zip(self._fields, self)]) + ')')
+            outstr = ('PegPyramid.State(' + ', '.join([f'{fld}={val}' for fld, val in zip(self._fields, self)]) + ')')  # pylint: disable=no-member
             return outstr
 
     NODES = {
