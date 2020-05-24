@@ -1,35 +1,58 @@
-from typing import List, NamedTuple
 from .PegBoard import PegBoard
 from .PegNodeLink import PegNodeLink
-from collections import namedtuple
+import typing as typ
+import collections
+
+
+class PyramidId(typ.NamedTuple):
+    p00: bool = False
+    p01: bool = False
+    p02: bool = False
+    p03: bool = False
+    p04: bool = False
+    p05: bool = False
+    p06: bool = False
+    p07: bool = False
+    p08: bool = False
+    p09: bool = False
+    p10: bool = False
+    p11: bool = False
+    p12: bool = False
+    p13: bool = False
+    p14: bool = False
+
+    @classmethod
+    def make(cls, *args, **kwargs):
+        if isinstance(args[0], str):
+            clean_arg = args[0].replace(' ', '')
+            if not len(clean_arg) == 15:
+                ValueError("cannot initialize with string if len is not 15")
+            newarg = []
+            for x in clean_arg:
+                if x not in ['x', 'o']:
+                    raise ValueError('all characters in string initialization must be "x" or "o"')
+                newarg.append(True if x == 'x' else False)
+            pyrid = PyramidId(*newarg, **kwargs)
+            return pyrid
+        pyrid = PyramidId(*args, **kwargs)
+        return pyrid
+
+    @property
+    def count(self):
+        return sum(self)
+
+    def __repr__(self):
+        for index, item in enumerate(self):
+            if not isinstance(item, bool):
+                raise TypeError(f'All items in PyramidId must be bool, {self._fields[index]}={item} was {type(item)}')  # pylint: disable=no-member
+        rows = [[0], [1, 2], [3, 4, 5], [6, 7, 8, 9], [10, 11, 12, 13, 14]]
+        rowsstr = [''.join(['{}'.format('x' if self[index] else 'o') for index in row]) for row in rows]  # pylint: disable=unsubscriptable-object
+        outstr = 'Pyr({})'.format(' '.join(rowsstr))
+        # outstr = ('Pyr(' + ''.join(['{}'.format('x' if val else 'o') for fld, val in zip(self._fields, self)]) + ')')  # pylint: disable=no-member
+        return outstr
 
 
 class PegPyramid(PegBoard):
-
-    class State(NamedTuple):
-        peg_0: int = False
-        peg_1: int = False
-        peg_2: int = False
-        peg_3: int = False
-        peg_4: int = False
-        peg_5: int = False
-        peg_6: int = False
-        peg_7: int = False
-        peg_8: int = False
-        peg_9: int = False
-        peg_10: int = False
-        peg_11: int = False
-        peg_12: int = False
-        peg_13: int = False
-        peg_14: int = False
-
-        @property
-        def count(self):
-            return sum(self)
-            
-        def __repr__(self):
-            outstr = ('PegPyramid.State(' + ', '.join([f'{fld}={val}' for fld, val in zip(self._fields, self)]) + ')')  # pylint: disable=no-member
-            return outstr
 
     NODES = {
         0: '0',
@@ -132,14 +155,14 @@ class PegPyramid(PegBoard):
         '{x[10]} {x[11]} {x[12]} {x[13]} {x[14]}'
     )
 
-    def __init__(self, initial_node: int = None, board_id: State = None):
+    def __init__(self, initial_node: int = None, board_id: PyramidId = None):
         PegBoard.__init__(self, self.NODES, self._FORMAT_STR)
         if initial_node is not None:
             if not isinstance(initial_node, int):
                 raise ValueError(f'initial_node ({initial_node}) must be an integer (was {type(initial_node)}')
             self.setup_game_board_from_initial_node(initial_node)
         elif board_id:
-            if not isinstance(board_id, self.State):
+            if not isinstance(board_id, PyramidId):
                 raise ValueError(f'board_id type must be State(NamedTuple), was {type(board_id)}')
             self.board_id = board_id
             self._valid_moves = self._find_valid_moves()
@@ -215,18 +238,18 @@ class PegPyramid(PegBoard):
         
         board_id can be used to recreate the current board state, as a shorthand way of saving the board status, or determining if this board_state is already in the analysis database
         """
-        board_id = self.State(*[self.peg(node) for node in self.pegs])
+        board_id = PyramidId(*[self.peg(node) for node in self.pegs])
         return board_id
 
     @board_id.setter
     def board_id(self, value):
-        if not isinstance(value, self.State):
+        if not isinstance(value, PyramidId):
             raise ValueError(f"board_id must be a State(NamedTuple), (was {type(value)})")
         for node, peg in zip(self.NODES, value):
             self._set_peg(node, peg)
 
-    def analyze_current_game_board(self) -> List[PegNodeLink]:
-        valid_moves: List[PegNodeLink] = []
+    def analyze_current_game_board(self) -> typ.List[PegNodeLink]:
+        valid_moves: typ.List[PegNodeLink] = []
         # TODO: Need to make a copy of the board, and actually complete the moves on it to find the full path.
 
         # TODO: this will only work for a board that only has one move left...

@@ -1,6 +1,41 @@
 import pytest
-from src.pegs.PegPyramid import PegPyramid
+from src.pegs.PegPyramid import PegPyramid, PyramidId
 from src.pegs.PegNodeLink import PegNodeLink
+
+
+class TestPyramidId:
+
+    def test_PyramidId_basic_init(self):
+        pyr_true = PyramidId(*([True] * 15))
+        pyr_false = PyramidId(*([False] * 15))
+        fields = [f'p{x:02d}' for x in range(15)]
+        pyr_true_dict = pyr_true._asdict()
+        pyr_false_dict = pyr_false._asdict()
+        for x in fields:
+            assert pyr_true_dict[x] == True
+            assert pyr_false_dict[x] == False
+
+    def test_PyramidId_count(self):
+        pyr_15 = PyramidId(*([True] * 15))
+        pyr_0 = PyramidId(*([False] * 15))
+        pyr_3 = PyramidId(*([True] * 3), *([False] * 12))
+        pyr_12 = PyramidId(*([False] * 3), *([True] * 12))
+        pyr_7 = PyramidId(False, True, False, True, False, True, False, True, False, True, False, True, False, True, False)
+        assert pyr_15.count == 15
+        assert pyr_0.count == 0
+        assert pyr_3.count == 3
+        assert pyr_12.count == 12
+        assert pyr_7.count == 7
+
+    def test_PyramidId_make_init(self):
+        pyr_15 = PyramidId.make('x xx xxx xxxx xxxxx')
+        pyr_0 = PyramidId.make('o oo ooo oooo ooooo')
+        pyr_6 = PyramidId.make('oxoxooxoxooxoxo')
+        assert str(pyr_15) == 'Pyr(x xx xxx xxxx xxxxx)'
+        assert str(pyr_0) == 'Pyr(o oo ooo oooo ooooo)'
+        assert str(pyr_6) == 'Pyr(o xo xoo xoxo oxoxo)'
+        pyr_7 = PyramidId.make(False, True, False, True, False, True, False, True, False, True, False, True, False, True, False)
+        assert str(pyr_7) == 'Pyr(o xo xox oxox oxoxo)'
 
 
 class TestPegPyramid_main_board:
@@ -54,6 +89,15 @@ class TestPegPyramid_main_board:
             'a b c d e   x x x x x'
         )
 
+    def test_setup_game_board_from_initial_node(self):
+        pyramid = PegPyramid()
+        pyramid.setup_game_board_from_initial_node(1)
+        assert str(pyramid.board_id) == 'Pyr(x ox xxx xxxx xxxxx)'
+        pyramid.setup_game_board_from_initial_node('4')
+        assert str(pyramid.board_id) == 'Pyr(x xx xox xxxx xxxxx)'
+        with pytest.raises(AttributeError):
+            pyramid.setup_game_board_from_initial_node(20)
+
     def test_analyze_current_game_board_runs(self):
         pyramid = PegPyramid()
         result = pyramid.analyze_current_game_board()
@@ -79,25 +123,23 @@ class TestPegPyramid_main_board:
 
     def test_board_id(self):
         pyramid = PegPyramid()
-        empty_board = PegPyramid.State(*([False] * 15))
+        empty_board = PyramidId(*([False] * 15))
         assert pyramid.board_id == empty_board
-        assert empty_board.__repr__() == (
-            'PegPyramid.State(peg_0=False, peg_1=False, peg_2=False, peg_3=False, peg_4=False, peg_5=False, peg_6=False, peg_7=False, peg_8=False, peg_9=False, peg_10=False, peg_11=False, peg_12=False, peg_13=False, peg_14=False)'
-        )
+        assert empty_board.__repr__() == 'Pyr(o oo ooo oooo ooooo)'
         pyramid.pegs = True
-        full_board = PegPyramid.State(*([True] * 15))
+        full_board = PyramidId(*([True] * 15))
         assert pyramid.board_id == full_board
 
     def test_board_id_restore(self):
         pyramid = PegPyramid()
-        empty_board = PegPyramid.State(*([False] * 15))
-        full_board = PegPyramid.State(*([True] * 15))
+        empty_board = PyramidId(*([False] * 15))
+        full_board = PyramidId(*([True] * 15))
         assert pyramid.count_pegs() == 0
         pyramid.board_id = full_board
         assert pyramid.count_pegs() == 15
         pyramid.board_id = empty_board
         assert pyramid.count_pegs() == 0
-        board_123 = PegPyramid.State(*([True] * 3 + [False] * 12))
+        board_123 = PyramidId(*([True] * 3 + [False] * 12))
         pyramid.board_id = board_123
         assert pyramid.count_pegs() == 3
         assert pyramid.pegs_string() == (  #
@@ -150,12 +192,12 @@ class TestPegPyramid_setup_boards:
     @pytest.mark.parametrize(
         'board_id',
         [
-            PegPyramid.State(*([False] * 15)),
-            PegPyramid.State(*([True] * 15)),
-            PegPyramid.State(*([False] * 5, [True] * 10)),
-            PegPyramid.State(*([True] * 5, [False] * 10)),
-            PegPyramid.State(False, True, False, True, False, True, *([True] * 8)),
-            PegPyramid.State(True, False, True, False, True, *([False] * 9)),
+            PyramidId(*([False] * 15)),
+            PyramidId(*([True] * 15)),
+            PyramidId(*([False] * 5, [True] * 10)),
+            PyramidId(*([True] * 5, [False] * 10)),
+            PyramidId(False, True, False, True, False, True, *([True] * 8)),
+            PyramidId(True, False, True, False, True, *([False] * 9)),
         ],
     )
     def test_setting_up_by_board_id(self, board_id):
@@ -168,7 +210,7 @@ class TestPegPyramid_setup_boards:
 
     def test_pyramids_are_equal_by_board_id(self):
         #First test 2 boards that are made the same way, they should be equal
-        board1 = PegPyramid.State(False, True, False, True, False, True, *([True] * 8))
+        board1 = PyramidId(False, True, False, True, False, True, *([True] * 8))
         pyr1 = PegPyramid(board_id=board1)
         pyr1_same = PegPyramid(board_id=board1)
         assert pyr1 == pyr1_same
@@ -178,7 +220,7 @@ class TestPegPyramid_setup_boards:
         pyr1_same.remove_peg(2)
         assert pyr1 == pyr1_same
         # board2 is different just by node 0 being True
-        board2 = PegPyramid.State(True, True, False, True, False, True, *([True] * 8))
+        board2 = PyramidId(True, True, False, True, False, True, *([True] * 8))
         pyr2 = PegPyramid(board_id=board2)
         assert pyr1 != pyr2
         # removing the peg in node 0 should make them equal

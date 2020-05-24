@@ -46,3 +46,8 @@ The the first move must be one of the following:
 After either of these moves, there will be 4 possible moves to jump one of the remaining pegs over another peg into one of the empty holes.
 
 Play proceeds until there are no pegs adjacent to each other. The remaining pegs on the board are counted to create the final score, with a lower score being better.
+
+## Development
+
+Running tests with coverage:
+> pytest ./tests --cov=src.pegs --cov-report=xml:cov.xml

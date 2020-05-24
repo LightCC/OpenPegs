@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple, TypeVar
+from typing import Dict, List, Tuple
 from .PegException import *
 
 
