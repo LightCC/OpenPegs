@@ -51,3 +51,5 @@ Play proceeds until there are no pegs adjacent to each other. The remaining pegs
 
 Running tests with coverage:
 > pytest ./tests --cov=src.pegs --cov-report=xml:cov.xml
+
+Add `--durations=10` to also get a list of the top 10 longest duration tests for shortening the suite

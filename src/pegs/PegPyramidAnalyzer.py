@@ -5,21 +5,47 @@ from .PegBoard import PegBoard
 from .PegNodeLink import PegNodeLink
 
 
-@dc.dataclass
 class PegMove:
-    link: PegNodeLink = None
-    idx: PyramidId = PyramidId.make('ooooooooooooooo')
+
+    def __init__(self, link: PegNodeLink = None, idx: PyramidId = None) -> None:
+        self.link = link
+        self.idx = idx
+
+    def __repr__(self):
+        return f'PegMove({self.link}->{self.idx})'
 
 
-@dc.dataclass
-class MoveChain:
-    chain: t.List[PegMove] = None
+class MoveChain():
+
+    def __init__(self, chain: t.Tuple[PegMove] = None) -> None:
+        if chain is None:
+            self.chain = tuple()
+        else:
+            self.chain = chain
+
+    @property
+    def end_board_pegs(self):
+        if self.chain is None:
+            return 0
+        else:
+            return self.chain[-1].idx.count
 
     def add_chain(self, move: PegMove):
-        if self.chain is None:
-            self.chain = [move]
-        else:
-            self.chain.append(move)  # pylint: disable=no-member
+        # to make it immutable using tuples, must return a new object
+        return MoveChain((*self.chain, move))
+
+    def __repr__(self):
+        return f'MoveChain(end_pegs={self.end_board_pegs}, len={len(self.chain)}, ' + ', '.join([f'{move}' for move in self.chain]) + ')'
+
+
+class FoundChain():
+
+    def __init__(self, index_in_moves_db: int, chain: MoveChain):
+        self.index = index_in_moves_db
+        self.chain = chain
+
+    def __repr__(self):
+        return f'FoundChain(index={self.index}, chain={self.chain})'
 
 
 class PegPyramidAnalyzer:
@@ -54,18 +80,21 @@ class PegPyramidAnalyzer:
     def analyze_game_board(self, board_id: PyramidId) -> t.Any:
         raise NotImplementedError
 
-    def find_move_chains(self, end_board_id: PyramidId = None, remaining_pegs: int = None) -> t.List[MoveChain]:
+    def find_move_chains(self, end_board_id: PyramidId = None, remaining_pegs: int = None) -> t.List[FoundChain]:
         if end_board_id:
-            chains: t.Tuple[int, MoveChain] = [(index, chain) for index, chain in enumerate(self.move_chains_db) if chain.chain[-1].idx == end_board_id]
+            x = [FoundChain(index, chain) for index, chain in enumerate(self.move_chains_db) if chain.chain[-1].idx == end_board_id]
+            chains: t.List[FoundChain] = x
         elif remaining_pegs:
+            raise NotImplementedError
             chains = []
         else:
             ValueError('Must specify at least one optional argument as a search criteria')
         return chains
 
     def get_all_move_chains(self, board_id: PyramidId):
-        start_chain = MoveChain(chain=[PegMove(idx=board_id)])
+        start_chain = MoveChain(chain=(PegMove(idx=board_id), ))
         self.recurse_next_board_chains(start_chain)
+        return self._move_chains_db
 
     def recurse_next_board_chains(self, start_chain: MoveChain, _recursion: int = 0) -> t.List[MoveChain]:
         if _recursion > 14:
@@ -74,12 +103,12 @@ class PegPyramidAnalyzer:
         moves = self.get_current_board_moves(last_board)
         if moves:
             for link, board_id in moves.items():
-                start_chain.add_chain(PegMove(link, board_id))
+                new_chain = start_chain.add_chain(PegMove(link, board_id))
                 # recurse to the next level for this move chain
-                self.recurse_next_board_chains(start_chain, _recursion=_recursion + 1)
+                self.recurse_next_board_chains(new_chain, _recursion=_recursion + 1)
         else:
             # If no move, this is the final chain in recursion, so append it to the object move_chain_db
-            peg_count = start_chain.chain[-1].idx.count
+            peg_count = start_chain.end_board_pegs
             self._move_chains_db.append(start_chain)
 
     def get_all_indiv_board_moves(self, board_id: PyramidId, _recursion=0) -> t.Any:

@@ -30,7 +30,7 @@ class PyramidId(typ.NamedTuple):
             newarg = []
             for x in clean_arg:
                 if x not in ['x', 'o']:
-                    raise ValueError('all characters in string initialization must be "x" or "o"')
+                    raise ValueError('all characters in string initialization must be "x" or "o" (after spaces are stripped)')
                 newarg.append(True if x == 'x' else False)
             pyrid = PyramidId(*newarg, **kwargs)
             return pyrid
@@ -44,12 +44,10 @@ class PyramidId(typ.NamedTuple):
     def __repr__(self):
         for index, item in enumerate(self):
             if not isinstance(item, bool):
-                raise TypeError(f'All items in PyramidId must be bool, {self._fields[index]}={item} was {type(item)}')  # pylint: disable=no-member
-        rows = [[0], [1, 2], [3, 4, 5], [6, 7, 8, 9], [10, 11, 12, 13, 14]]
-        rowsstr = [''.join(['{}'.format('x' if self[index] else 'o') for index in row]) for row in rows]  # pylint: disable=unsubscriptable-object
-        outstr = 'Pyr({})'.format(' '.join(rowsstr))
-        # outstr = ('Pyr(' + ''.join(['{}'.format('x' if val else 'o') for fld, val in zip(self._fields, self)]) + ')')  # pylint: disable=no-member
-        return outstr
+                raise TypeError(f'Did you create PyramidId directly, rather than using the `.make` factory method?\nAll items in PyramidId must be bool, {self._fields[index]}={item} was {type(item)}')  # pylint: disable=no-member
+        format_str = "Pyr({x[0]} {x[1]}{x[2]} {x[3]}{x[4]}{x[5]} {x[6]}{x[7]}{x[8]}{x[9]} {x[10]}{x[11]}{x[12]}{x[13]}{x[14]})"
+        pegs_str = ['x' if item else 'o' for item in self]  # pylint: disable=unsubscriptable-object,not-an-iterable
+        return format_str.format(x=pegs_str)
 
 
 class PegPyramid(PegBoard):

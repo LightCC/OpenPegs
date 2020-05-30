@@ -1,5 +1,5 @@
 import pytest
-from src.pegs.PegPyramidAnalyzer import PegPyramidAnalyzer
+from src.pegs.PegPyramidAnalyzer import PegPyramidAnalyzer, PegMove, MoveChain, FoundChain
 from src.pegs.PegPyramid import PegPyramid, PyramidId
 from src.pegs.PegNodeLink import PegNodeLink
 
@@ -19,6 +19,18 @@ def boards():
         '1-5': PyramidId.make('oxoooxooooooooo'),
     }
     yield boards
+
+
+class TestPegMove:
+
+    def test_PegMove_init(self):
+        move1 = PegMove(PegNodeLink(1, 2, 5), PyramidId.make('o ox xoo oooo ooooo'))
+        assert str(move1) == f'PegMove(1->2->5->Pyr(o ox xoo oooo ooooo))'
+        move2 = PegMove(link=PegNodeLink(2, 3, 4), idx=PyramidId.make('ooxxooooooxxxxx'))
+        assert str(move2) == f'PegMove(2->3->4->Pyr(o ox xoo oooo xxxxx))'
+        move3 = PegMove()
+        assert move3.link is None
+        assert move3.idx is None
 
 
 class TestPegBoardAnalyzer:
@@ -54,7 +66,7 @@ class TestPegBoardAnalyzer:
             PegNodeLink(0, 2, 5): boards['1-5'],
         }
 
-    def test_get_all_indiv_board_moves(self, sut, boards):
+    def test_get_all_indiv_board_moves_quick(self, sut, boards):
         sut.get_all_indiv_board_moves(boards['0-1-2'])
         move_db = sut._board_moves_db
         peg_count_list = [peg_count for peg_count in move_db.keys()]
@@ -71,9 +83,11 @@ class TestPegBoardAnalyzer:
         assert moves_2[boards['1-5']] == {}
         assert moves_2[boards['2-3']] == {}
 
+    @pytest.mark.slow
+    def test_get_all_indiv_board_moves_slow(self, sut, boards):
         board = PegPyramid(initial_node=0)
         sut.get_all_indiv_board_moves(board.board_id)
-        assert sut.move_count_in_board_db == 10308
+        assert sut.move_count_in_board_db == 10306
 
     def test_get_all_indiv_board_moves_recursion_error(self, sut, boards):
         board = PegPyramid(initial_node=0)
@@ -81,11 +95,55 @@ class TestPegBoardAnalyzer:
             ## Start with just enough recursion to trigger a Recursion error
             sut.get_all_indiv_board_moves(board.board_id, _recursion=2)
 
-    def test_get_all_move_chains(self, sut, boards):
-        board = PegPyramid(initial_node=12)
-        chains = sut.get_all_move_chains(board.board_id)
+    def test_get_all_move_chains_quick(self, sut, boards):
+        setup_info = (
+            """
+            ## Start with board_id = PyramidId.make('x xx xxx xxxx xxoxx'), which allows getting to the perfect end board.
+            # Create the move database, then find all boards with the perfect end board Pyr(o oo oxo oooo ooooo'),
+            # The found_moves chain will be 1550 entries. Choosing the first entry, the move chain will have the following moves:
+            found_chains[0].chain.chain[0] = PegMove(None->Pyr(x xx xxx xxxx xxoxx))
+            # 7 more intermediate moves, then
+            found_chains[0].chain.chain[8] = PegMove(11->12->13->Pyr(o ox xox oxxo oooxo))
+            found_chains[0].chain.chain[9] = PegMove(3->7->12->Pyr(o ox oox ooxo ooxxo))
+            found_chains[0].chain.chain[10] = PegMove(13->12->11->Pyr(o ox oox ooxo oxooo))
+            found_chains[0].chain.chain[11] = PegMove(2->5->9->Pyr(o oo ooo ooxx oxooo))
+            found_chains[0].chain.chain[12] = PegMove(9->8->7->Pyr(o oo ooo oxoo oxooo))
+            found_chains[0].chain.chain[13] = PegMove(11->7->4->Pyr(o oo oxo oooo ooooo)) # Perfect game ending point
+            
+            # Here are the final stats on several of these, that can be used for a shorter test to generating all moves from a starting board
+            # Using chain[8].idx board as the starting point,
+            #    the final move chain database has 83 total MoveChains, and 5 chains that will resolve to the perfect game board:
+            #    which are indexes: [45, 53, 54, 75, and 76] in found_chains
+            # Using chain[9].idx as the starting point,
+            #    the final move chain database has 24 total MoveChains, and 3 chains that will resolve to the perfect game board:
+            #    which are indexes: [11, 19, 20] in the found_chains
+            # Using chain[10].idx as the starting point,
+            #    the final move chain database has 4 total MoveChains, and 1 chains that will resolve to the perfect game board:
+            #    which is index: [3]
+        """
+        )
+
+        start_board = PyramidId.make('o ox oox ooxo oxooo')
+        mdb = sut.get_all_move_chains(start_board)
         db = sut.board_moves_db
-        mdb = sut.move_chains_db
+        assert len(db) == 4
+        assert list(db.keys()) == [4, 3, 2, 1]
+        assert db[1] == {PyramidId.make('o oo oxo oooo ooooo'): {}}
+        end_board = PyramidId.make('o oo oxo oooo ooooo')
+        found_chains = sut.find_move_chains(end_board_id=end_board)
+        assert len(found_chains) == 1
+        assert found_chains[0].index == 3
+        assert str(
+            found_chains[0].chain
+        ) == "MoveChain(end_pegs=1, len=4, PegMove(None->Pyr(o ox oox ooxo oxooo)), PegMove(2->5->9->Pyr(o oo ooo ooxx oxooo)), PegMove(9->8->7->Pyr(o oo ooo oxoo oxooo)), PegMove(11->7->4->Pyr(o oo oxo oooo ooooo)))"
+
+    @pytest.mark.slow
+    def test_get_all_move_chains_slow(self, sut, boards):
+        board = PegPyramid(initial_node=12)
+        mdb = sut.get_all_move_chains(board.board_id)
+        assert len(mdb) == 1149568
+        db = sut.board_moves_db
+        assert len(db) == 14
 
         end_board = PyramidId.make('o oo oxo oooo ooooo')  # board with peg in middle as end board
         found_chains = sut.find_move_chains(end_board_id=end_board)

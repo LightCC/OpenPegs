@@ -9,11 +9,10 @@ class TestPyramidId:
         pyr_true = PyramidId(*([True] * 15))
         pyr_false = PyramidId(*([False] * 15))
         fields = [f'p{x:02d}' for x in range(15)]
-        pyr_true_dict = pyr_true._asdict()
-        pyr_false_dict = pyr_false._asdict()
-        for x in fields:
-            assert pyr_true_dict[x] == True
-            assert pyr_false_dict[x] == False
+        for x in pyr_true:  # pylint: disable=not-an-iterable
+            assert x == True
+        for x in pyr_false:  # pylint: disable=not-an-iterable
+            assert x == False
 
     def test_PyramidId_count(self):
         pyr_15 = PyramidId(*([True] * 15))
@@ -36,6 +35,12 @@ class TestPyramidId:
         assert str(pyr_6) == 'Pyr(o xo xoo xoxo oxoxo)'
         pyr_7 = PyramidId.make(False, True, False, True, False, True, False, True, False, True, False, True, False, True, False)
         assert str(pyr_7) == 'Pyr(o xo xox oxox oxoxo)'
+        with pytest.raises(ValueError):
+            pyr = PyramidId.make('000000000000000')
+        with pytest.raises(ValueError):
+            pyr = PyramidId.make(' 0 00 000 0000 00000 ')
+        with pytest.raises(ValueError):
+            pyr = PyramidId.make('= x xx ooo oooo xxxxx ')
 
 
 class TestPegPyramid_main_board:
@@ -203,7 +208,7 @@ class TestPegPyramid_setup_boards:
     def test_setting_up_by_board_id(self, board_id):
         pyr = PegPyramid(board_id=board_id)
         assert pyr.board_id == board_id
-        for peg, board_peg in zip(pyr.pegs.values(), board_id):
+        for peg, board_peg in zip(pyr.pegs.values(), board_id):  # pylint: disable=no-member
             assert peg == board_peg
         state = pyr.board_id
         assert state == board_id
