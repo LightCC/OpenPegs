@@ -16,6 +16,9 @@
 ### Python ###
 
 ## Start of Added items
+# PyTest coverage
+cov.xml
+
 # Virtual Environments
 .venv/*
 venv/*

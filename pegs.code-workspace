@@ -15,14 +15,15 @@
 		},
 		"python.formatting.provider": "yapf",
 		"editor.formatOnSave": true,
-		"python.testing.pytestArgs": [
-			"./tests",
-			"--cov-report=xml:cov.xml",
-			"--cov-report=html"
-		],
 		"python.testing.unittestEnabled": false,
 		"python.testing.nosetestsEnabled": false,
 		"python.testing.pytestEnabled": true,
+		"python.testing.pytestArgs": [
+			"./tests",
+			"--cov-report=xml:cov.xml",
+			"--cov-report=html",
+			"-m 'not slow'"
+		],
 		"python.linting.mypyArgs": [
 			"--ignore-missing-imports",
 			"--follow-imports=silent",
@@ -37,13 +38,7 @@
 		"coverage-gutters.noHighlightLight": "rgba(220, 143, 143, 0.3)",
 		"coverage-gutters.partialHighlightDark": "rgba(121, 86, 10, 0.3)",
 		"coverage-gutters.partialHighlightLight": "rgba(220, 213, 143, 0.3)",
-		"coverage-gutters.showRulerCoverage": true
+		"coverage-gutters.showRulerCoverage": true,
+		"pythonTestExplorer.testFramework": "pytest"
 	},
-	"coverage-gutters.coverageFileNames": [
-		"lcov.info",
-		"cov.xml",
-		"coverage.xml",
-		"jacoco.xml"
-	]
-	
 }
