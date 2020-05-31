@@ -26,9 +26,16 @@ class MoveChain():
     @property
     def end_board_pegs(self):
         if self.chain is None:
-            return 0
+            return None
         else:
             return self.chain[-1].idx.count
+
+    @property
+    def end_board_id(self):
+        if self.chain is None:
+            return None
+        else:
+            return self.chain[-1].idx
 
     def add_chain(self, move: PegMove):
         # to make it immutable using tuples, must return a new object
@@ -43,6 +50,10 @@ class FoundChain():
     def __init__(self, index_in_moves_db: int, chain: MoveChain):
         self.index = index_in_moves_db
         self.chain = chain
+
+    @property
+    def end_board_pegs(self):
+        return self.chain.end_board_pegs
 
     def __repr__(self):
         return f'FoundChain(index={self.index}, chain={self.chain})'
@@ -60,6 +71,7 @@ class PegPyramidAnalyzer:
         if self._move_chains_db is None:
             self._move_chains_db = []
         self.test = PegPyramid()
+        self._last_found_chains = None
 
     @property
     def move_count_in_board_db(self):
@@ -76,19 +88,26 @@ class PegPyramidAnalyzer:
     @property
     def move_chains_db(self):
         return self._move_chains_db
-
+    
+    @property
+    def found_moves(self):
+        return self._last_found_chains
+    
     def analyze_game_board(self, board_id: PyramidId) -> t.Any:
         raise NotImplementedError
 
     def find_move_chains(self, end_board_id: PyramidId = None, remaining_pegs: int = None) -> t.List[FoundChain]:
+        chains: t.List[FoundChain]
+
         if end_board_id:
-            x = [FoundChain(index, chain) for index, chain in enumerate(self.move_chains_db) if chain.chain[-1].idx == end_board_id]
-            chains: t.List[FoundChain] = x
+            x = [FoundChain(index, chain) for index, chain in enumerate(self.move_chains_db) if chain.end_board_id == end_board_id]
+            chains = x
         elif remaining_pegs:
-            raise NotImplementedError
-            chains = []
+            x = [FoundChain(index, chain) for index, chain in enumerate(self.move_chains_db) if chain.end_board_pegs == remaining_pegs]
+            chains = x
         else:
             ValueError('Must specify at least one optional argument as a search criteria')
+        self._last_found_chains = chains
         return chains
 
     def get_all_move_chains(self, board_id: PyramidId):
