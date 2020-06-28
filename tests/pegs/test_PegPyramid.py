@@ -103,29 +103,6 @@ class TestPegPyramid_main_board:
         with pytest.raises(AttributeError):
             pyramid.setup_game_board_from_initial_node(20)
 
-    def test_analyze_current_game_board_runs(self):
-        pyramid = PegPyramid()
-        result = pyramid.analyze_current_game_board()
-        assert result == []
-        pyramid.add_peg(10)
-        pyramid.add_peg(11)
-        result = pyramid.analyze_current_game_board()
-        assert result == pyramid.valid_moves
-
-    def test_analyze_final_move(self):
-        """
-        Test analysis of a board with a single possible final move
-        """
-        # Setup with pegs in nodes 1 and 2
-        pyramid = PegPyramid()
-        pyramid.pegs = False
-        pyramid.add_peg(0)
-        pyramid.add_peg(1)
-        # Only move left is jump 0->1->3
-        results = pyramid.analyze_current_game_board()
-        assert len(results) == 1
-        assert str(results[0]) == '0->1->3'
-
     def test_board_id(self):
         pyramid = PegPyramid()
         empty_board = PyramidId(*([False] * 15))
@@ -183,6 +160,16 @@ class TestPegPyramid_setup_boards:
             assert pyr.peg(node) == False
 
     @pytest.mark.parametrize(
+        'not_an_int_or_board_id',
+        ['string', ['a', 'list'], [1], set([0]), 1.012, {1: 1}],
+    )
+    def test_init_arg_failures(self, not_an_int_or_board_id):
+        with pytest.raises(ValueError):
+            pyr = PegPyramid(initial_node=not_an_int_or_board_id)
+        with pytest.raises(ValueError):
+            pyr = PegPyramid(board_id=not_an_int_or_board_id)
+
+    @pytest.mark.parametrize(
         'node',
         range(15),
     )
@@ -203,6 +190,7 @@ class TestPegPyramid_setup_boards:
             PyramidId(*([True] * 5, [False] * 10)),
             PyramidId(False, True, False, True, False, True, *([True] * 8)),
             PyramidId(True, False, True, False, True, *([False] * 9)),
+            PyramidId.make('o xx xxo oxxo oxoxo')
         ],
     )
     def test_setting_up_by_board_id(self, board_id):

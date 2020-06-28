@@ -1,7 +1,6 @@
+import typing as typ
 from .PegBoard import PegBoard
 from .PegNodeLink import PegNodeLink
-import typing as typ
-import collections
 
 
 class PyramidId(typ.NamedTuple):
@@ -245,14 +244,3 @@ class PegPyramid(PegBoard):
             raise ValueError(f"board_id must be a State(NamedTuple), (was {type(value)})")
         for node, peg in zip(self.NODES, value):
             self._set_peg(node, peg)
-
-    def analyze_current_game_board(self) -> typ.List[PegNodeLink]:
-        valid_moves: typ.List[PegNodeLink] = []
-        # TODO: Need to make a copy of the board, and actually complete the moves on it to find the full path.
-
-        # TODO: this will only work for a board that only has one move left...
-        if self.count_pegs() == 2:
-            return self.valid_moves
-        else:
-            ## return an empty list if we couldn't analyze the board
-            return []

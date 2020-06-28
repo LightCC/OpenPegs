@@ -25,12 +25,22 @@ class TestPegMove:
 
     def test_PegMove_init(self):
         move1 = PegMove(PegNodeLink(1, 2, 5), PyramidId.make('o ox xoo oooo ooooo'))
-        assert str(move1) == f'PegMove(1->2->5->Pyr(o ox xoo oooo ooooo))'
+        assert str(move1) == f'PegMove(1->2->5, Pyr(o ox xoo oooo ooooo))'
         move2 = PegMove(link=PegNodeLink(2, 3, 4), idx=PyramidId.make('ooxxooooooxxxxx'))
-        assert str(move2) == f'PegMove(2->3->4->Pyr(o ox xoo oooo xxxxx))'
+        assert str(move2) == f'PegMove(2->3->4, Pyr(o ox xoo oooo xxxxx))'
         move3 = PegMove()
         assert move3.link is None
         assert move3.idx is None
+
+    def test_PegMove_eq(self):
+        a1 = PegMove(link=PegNodeLink(1, 2, 3), idx=PyramidId.make('o oo ooo oooo xxxxx'))
+        a2 = PegMove(link=PegNodeLink(1, 2, 3), idx=PyramidId.make('o oo ooo oooo xxxxx'))
+        b_diff_move = PegMove(link=PegNodeLink(1, 2, 4), idx=PyramidId.make('o oo ooo oooo xxxxx'))
+        c_diff_id = PegMove(link=PegNodeLink(1, 2, 3), idx=PyramidId.make('o oo ooo oooo oxxxx'))
+        assert a1 == a2
+        assert a1 is not a2
+        assert a1 != b_diff_move
+        assert a1 != c_diff_id
 
 
 class TestPegBoardAnalyzer:
@@ -83,6 +93,7 @@ class TestPegBoardAnalyzer:
         assert moves_2[boards['1-5']] == {}
         assert moves_2[boards['2-3']] == {}
 
+    @pytest.mark.skip
     # @pytest.mark.slow
     def test_get_all_indiv_board_moves_slow(self, sut, boards):
         board = PegPyramid(initial_node=0)
@@ -101,14 +112,14 @@ class TestPegBoardAnalyzer:
             ## Start with board_id = PyramidId.make('x xx xxx xxxx xxoxx'), which allows getting to the perfect end board.
             # Create the move database, then find all boards with the perfect end board Pyr(o oo oxo oooo ooooo'),
             # The found_moves chain will be 1550 entries. Choosing the first entry, the move chain will have the following moves:
-            found_chains[0].chain.chain[0] = PegMove(None->Pyr(x xx xxx xxxx xxoxx))
+            found_chains[0].chain.chain[0] = PegMove(None, Pyr(x xx xxx xxxx xxoxx))
             # 7 more intermediate moves, then
-            found_chains[0].chain.chain[8] = PegMove(11->12->13->Pyr(o ox xox oxxo oooxo))
-            found_chains[0].chain.chain[9] = PegMove(3->7->12->Pyr(o ox oox ooxo ooxxo))
-            found_chains[0].chain.chain[10] = PegMove(13->12->11->Pyr(o ox oox ooxo oxooo))
-            found_chains[0].chain.chain[11] = PegMove(2->5->9->Pyr(o oo ooo ooxx oxooo))
-            found_chains[0].chain.chain[12] = PegMove(9->8->7->Pyr(o oo ooo oxoo oxooo))
-            found_chains[0].chain.chain[13] = PegMove(11->7->4->Pyr(o oo oxo oooo ooooo)) # Perfect game ending point
+            found_chains[0].chain.chain[8] = PegMove(11->12->13, Pyr(o ox xox oxxo oooxo))
+            found_chains[0].chain.chain[9] = PegMove(3->7->12, Pyr(o ox oox ooxo ooxxo))
+            found_chains[0].chain.chain[10] = PegMove(13->12->11, Pyr(o ox oox ooxo oxooo))
+            found_chains[0].chain.chain[11] = PegMove(2->5->9, Pyr(o oo ooo ooxx oxooo))
+            found_chains[0].chain.chain[12] = PegMove(9->8->7, Pyr(o oo ooo oxoo oxooo))
+            found_chains[0].chain.chain[13] = PegMove(11->7->4, Pyr(o oo oxo oooo ooooo)) # Perfect game ending point
             
             # Here are the final stats on several of these, that can be used for a shorter test to generating all moves from a starting board
             # Using chain[8].idx board as the starting point,
@@ -125,14 +136,14 @@ class TestPegBoardAnalyzer:
 
         expected_found_chains = {
             'final_board_4':
-                "FoundChain(index=3, chain=MoveChain(end_pegs=1, len=4, PegMove(None->Pyr(o ox oox ooxo oxooo)), PegMove(2->5->9->Pyr(o oo ooo ooxx oxooo)), PegMove(9->8->7->Pyr(o oo ooo oxoo oxooo)), PegMove(11->7->4->Pyr(o oo oxo oooo ooooo))))",  # for final board is Pyr(o oo oxo oooo ooooo)
+                "FoundChain(index=3, chain=MoveChain(end_pegs=1, len=4, PegMove(None, Pyr(o ox oox ooxo oxooo)), PegMove(2->5->9, Pyr(o oo ooo ooxx oxooo)), PegMove(9->8->7, Pyr(o oo ooo oxoo oxooo)), PegMove(11->7->4, Pyr(o oo oxo oooo ooooo))))",  # for final board is Pyr(o oo oxo oooo ooooo)
             'pegs 1':
-                "FoundChain(index=3, chain=MoveChain(end_pegs=1, len=4, PegMove(None->Pyr(o ox oox ooxo oxooo)), PegMove(2->5->9->Pyr(o oo ooo ooxx oxooo)), PegMove(9->8->7->Pyr(o oo ooo oxoo oxooo)), PegMove(11->7->4->Pyr(o oo oxo oooo ooooo))))",
+                "FoundChain(index=3, chain=MoveChain(end_pegs=1, len=4, PegMove(None, Pyr(o ox oox ooxo oxooo)), PegMove(2->5->9, Pyr(o oo ooo ooxx oxooo)), PegMove(9->8->7, Pyr(o oo ooo oxoo oxooo)), PegMove(11->7->4, Pyr(o oo oxo oooo ooooo))))",
             'pegs 2-0':
-                "FoundChain(index=0, chain=MoveChain(end_pegs=2, len=3, PegMove(None->Pyr(o ox oox ooxo oxooo)), PegMove(5->8->12->Pyr(o ox ooo oooo oxxoo)), PegMove(11->12->13->Pyr(o ox ooo oooo oooxo))))",
+                "FoundChain(index=0, chain=MoveChain(end_pegs=2, len=3, PegMove(None, Pyr(o ox oox ooxo oxooo)), PegMove(5->8->12, Pyr(o ox ooo oooo oxxoo)), PegMove(11->12->13, Pyr(o ox ooo oooo oooxo))))",
             'pegs 2-1':
-                "FoundChain(index=1, chain=MoveChain(end_pegs=2, len=3, PegMove(None->Pyr(o ox oox ooxo oxooo)), PegMove(5->8->12->Pyr(o ox ooo oooo oxxoo)), PegMove(12->11->10->Pyr(o ox ooo oooo xoooo))))",
-            'pegs 3': "FoundChain(index=2, chain=MoveChain(end_pegs=3, len=2, PegMove(None->Pyr(o ox oox ooxo oxooo)), PegMove(5->2->0->Pyr(x oo ooo ooxo oxooo))))",  # for remaining pegs = 3
+                "FoundChain(index=1, chain=MoveChain(end_pegs=2, len=3, PegMove(None, Pyr(o ox oox ooxo oxooo)), PegMove(5->8->12, Pyr(o ox ooo oooo oxxoo)), PegMove(12->11->10, Pyr(o ox ooo oooo xoooo))))",
+            'pegs 3': "FoundChain(index=2, chain=MoveChain(end_pegs=3, len=2, PegMove(None, Pyr(o ox oox ooxo oxooo)), PegMove(5->2->0, Pyr(x oo ooo ooxo oxooo))))",  # for remaining pegs = 3
         }
 
         start_board = PyramidId.make('o ox oox ooxo oxooo')
@@ -157,6 +168,7 @@ class TestPegBoardAnalyzer:
         assert len(found_chains_pegs_3) == 1
         assert str(found_chains_pegs_3[0]) == expected_found_chains['pegs 3']
 
+    @pytest.mark.skip
     #  @pytest.mark.slow
     def test_get_all_move_chains_slow(self, sut, boards):
         board = PegPyramid(initial_node=12)
@@ -170,10 +182,30 @@ class TestPegBoardAnalyzer:
         assert len(found_chains) == 1550
         assert str(
             found_chains[0]
-        ) == "FoundChain(index=636026, chain=MoveChain(end_pegs=1, len=14, PegMove(None->Pyr(x xx xxx xxxx xxoxx)), PegMove(10->11->12->Pyr(x xx xxx xxxx ooxxx)), PegMove(13->12->11->Pyr(x xx xxx xxxx oxoox)), PegMove(5->8->12->Pyr(x xx xxo xxox oxxox)), PegMove(14->9->5->Pyr(x xx xxx xxoo oxxoo)), PegMove(1->4->8->Pyr(x ox xox xxxo oxxoo)), PegMove(6->3->1->Pyr(x xx oox oxxo oxxoo)), PegMove(0->1->3->Pyr(o ox xox oxxo oxxoo)), PegMove(11->12->13->Pyr(o ox xox oxxo oooxo)), PegMove(3->7->12->Pyr(o ox oox ooxo ooxxo)), PegMove(13->12->11->Pyr(o ox oox ooxo oxooo)), PegMove(2->5->9->Pyr(o oo ooo ooxx oxooo)), PegMove(9->8->7->Pyr(o oo ooo oxoo oxooo)), PegMove(11->7->4->Pyr(o oo oxo oooo ooooo))))"
+        ) == "FoundChain(index=636026, chain=MoveChain(end_pegs=1, len=14, PegMove(None(x xx xxx xxxx xxoxx)), PegMove(10->11->12, Pyr(x xx xxx xxxx ooxxx)), PegMove(13->12->11, Pyr(x xx xxx xxxx oxoox)), PegMove(5->8->12, Pyr(x xx xxo xxox oxxox)), PegMove(14->9->5, Pyr(x xx xxx xxoo oxxoo)), PegMove(1->4->8, Pyr(x ox xox xxxo oxxoo)), PegMove(6->3->1, Pyr(x xx oox oxxo oxxoo)), PegMove(0->1->3, Pyr(o ox xox oxxo oxxoo)), PegMove(11->12->13, Pyr(o ox xox oxxo oooxo)), PegMove(3->7->12, Pyr(o ox oox ooxo ooxxo)), PegMove(13->12->11, Pyr(o ox oox ooxo oxooo)), PegMove(2->5->9, Pyr(o oo ooo ooxx oxooo)), PegMove(9->8->7, Pyr(o oo ooo oxoo oxooo)), PegMove(11->7->4, Pyr(o oo oxo oooo ooooo))))"
 
         found_chains_1_peg = sut.find_move_chains(remaining_pegs=1)
         assert len(found_chains_1_peg) == 85258
         assert str(
             found_chains_1_peg[0]
-        ) == "FoundChain(index=492, chain=MoveChain(end_pegs=1, len=14, PegMove(None->Pyr(x xx xxx xxxx xxoxx)), PegMove(5->8->12->Pyr(x xx xxo xxox xxxxx)), PegMove(14->9->5->Pyr(x xx xxx xxoo xxxxo)), PegMove(12->13->14->Pyr(x xx xxx xxoo xxoox)), PegMove(1->4->8->Pyr(x ox xox xxxo xxoox)), PegMove(6->3->1->Pyr(x xx oox oxxo xxoox)), PegMove(0->1->3->Pyr(o ox xox oxxo xxoox)), PegMove(3->7->12->Pyr(o ox oox ooxo xxxox)), PegMove(11->12->13->Pyr(o ox oox ooxo xooxx)), PegMove(2->5->9->Pyr(o oo ooo ooxx xooxx)), PegMove(14->9->5->Pyr(o oo oox ooxo xooxo)), PegMove(5->8->12->Pyr(o oo ooo oooo xoxxo)), PegMove(13->12->11->Pyr(o oo ooo oooo xxooo)), PegMove(10->11->12->Pyr(o oo ooo oooo ooxoo))))"
+        ) == "FoundChain(index=492, chain=MoveChain(end_pegs=1, len=14, PegMove(None, Pyr(x xx xxx xxxx xxoxx)), PegMove(5->8->12, Pyr(x xx xxo xxox xxxxx)), PegMove(14->9->5, Pyr(x xx xxx xxoo xxxxo)), PegMove(12->13->14, Pyr(x xx xxx xxoo xxoox)), PegMove(1->4->8, Pyr(x ox xox xxxo xxoox)), PegMove(6->3->1, Pyr(x xx oox oxxo xxoox)), PegMove(0->1->3, Pyr(o ox xox oxxo xxoox)), PegMove(3->7->12, Pyr(o ox oox ooxo xxxox)), PegMove(11->12->13, Pyr(o ox oox ooxo xooxx)), PegMove(2->5->9, Pyr(o oo ooo ooxx xooxx)), PegMove(14->9->5, Pyr(o oo oox ooxo xooxo)), PegMove(5->8->12, Pyr(o oo ooo oooo xoxxo)), PegMove(13->12->11, Pyr(o oo ooo oooo xxooo)), PegMove(10->11->12, Pyr(o oo ooo oooo ooxoo))))"
+
+    def test_analyze_final_move(self):
+        """
+        Test analysis of a board with a single possible final move
+        """
+        # Setup with pegs in nodes 1 and 2
+        analyze = PegPyramidAnalyzer()
+        # Only move left is jump 0->1->3
+        results = list(analyze.analyze_game_board(PyramidId.make('x xo ooo oooo ooooo')))
+        assert len(results) == 1
+        assert str(results[0]) == '0->1->3'
+
+    def test_analyze_current_game_board_runs(self):
+        analyze = PegPyramidAnalyzer()
+        pyr0 = PyramidId.make('o oo ooo oooo ooooo')
+        result = analyze.analyze_game_board(pyr0)
+        assert result == set()
+        pyr_10_11 = PyramidId.make('o oo ooo oooo xxooo')
+        results = analyze.analyze_game_board(pyr_10_11)
+        assert results == analyze.find_valid_moves(pyr_10_11)

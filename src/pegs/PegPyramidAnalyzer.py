@@ -11,11 +11,16 @@ class PegMove:
         self.link = link
         self.idx = idx
 
+    def __eq__(self, other):
+        if not isinstance(other, PegMove):
+            return NotImplemented
+        return (self.link == other.link) and (self.idx == other.idx)
+
     def __repr__(self):
-        return f'PegMove({self.link}->{self.idx})'
+        return f'PegMove({self.link}, {self.idx})'
 
 
-class MoveChain():
+class MoveChain:
 
     def __init__(self, chain: t.Tuple[PegMove] = None) -> None:
         if chain is None:
@@ -88,26 +93,55 @@ class PegPyramidAnalyzer:
     @property
     def move_chains_db(self):
         return self._move_chains_db
-    
+
     @property
     def found_moves(self):
         return self._last_found_chains
-    
-    def analyze_game_board(self, board_id: PyramidId) -> t.Any:
-        raise NotImplementedError
 
-    def find_move_chains(self, end_board_id: PyramidId = None, remaining_pegs: int = None) -> t.List[FoundChain]:
+    def analyze_game_board(self, board_id: PyramidId) -> t.List[PegNodeLink]:
+        print('Starting analysis.')
+        print('Finding all moves...')
+        self._move_chains_db = []  # reset move chains database
+        self.get_all_move_chains(board_id)
+
+        print('Finding best move...')
+        best_moves = None
+        pegs_left_to_check = 1
+        while best_moves is None:
+            found_chains = self.find_move_chains(remaining_pegs=pegs_left_to_check)
+            if found_chains:
+                best_moves = found_chains
+            else:
+                if pegs_left_to_check >= 14:
+                    best_moves = []
+                else:
+                    pegs_left_to_check += 1
+        self._last_found_chains = found_chains
+
+        number_of_moves = len(best_moves)
+        print(f'Found {number_of_moves} total move chains that leave {pegs_left_to_check} pegs')
+        moves = [found_chain.chain.chain[1].link for found_chain in best_moves]
+        best_next_moves = set(moves)
+        for move in best_next_moves:
+            print(f'  -> ({move})')
+        return best_next_moves
+
+    def find_move_chains(
+        self,
+        end_board_id: PyramidId = None,
+        remaining_pegs: int = None,
+    ) -> t.List[FoundChain]:
+
         chains: t.List[FoundChain]
 
         if end_board_id:
-            x = [FoundChain(index, chain) for index, chain in enumerate(self.move_chains_db) if chain.end_board_id == end_board_id]
+            x = [FoundChain(index, chain) for index, chain in enumerate(self._move_chains_db) if chain.end_board_id == end_board_id]
             chains = x
         elif remaining_pegs:
-            x = [FoundChain(index, chain) for index, chain in enumerate(self.move_chains_db) if chain.end_board_pegs == remaining_pegs]
+            x = [FoundChain(index, chain) for index, chain in enumerate(self._move_chains_db) if chain.end_board_pegs == remaining_pegs]
             chains = x
         else:
             ValueError('Must specify at least one optional argument as a search criteria')
-        self._last_found_chains = chains
         return chains
 
     def get_all_move_chains(self, board_id: PyramidId):
