@@ -1,40 +1,62 @@
-try:
-    from .PegPyramid import PegPyramid
-    from .PegNodeLink import PegNodeLink
-except ImportError:
-    print("\n"  #
-            "{}: Try running `pegs` from the command line!!"  #
-            "\n"  #
-            "or run with `python run_pegs.py` from root directory\n"  #
-            .format(__file__))
+import sys, argparse
+from .PegPyramidAnalyzer import PegPyramidAnalyzer
+from .PegPyramid import PegPyramid, PyramidId
+from .PegNodeLink import PegNodeLink
 
 
 def main():
 
-    def setup_new_game():
+    def parse_args():
+
+        class Configs:
+            version = None
+            start_board = None
+
+        configs = Configs()
+        configs.version = '0.0.1'
+
+        parser = argparse.ArgumentParser(prog="OpenPegs", add_help=True)
+        parser.add_argument('-V', '--version', help='display version', action="store_true")
+        parser.add_argument('--start_board', help='(developer only) starting board in PyramidId format', default=None)
+        args = parser.parse_args()
+        if args.version:
+            print(f'OpenPegs v{configs.version}')
+            sys.exit()
+        configs.start_board = args.start_board
+        return configs
+
+    def setup_new_game(start_board):
         """Create a new game board, ask user which position to leave open, and setup board
         
+        Args:
+            board_id (PyramidId): if provided, the starting game board
         Returns:
             PegPyramid -- a new game board setup per user input
         """
-        ## Setup the game board
-        new_pyramid = PegPyramid()
-        valid_start_node = False
-        while valid_start_node == False:
-            print(new_pyramid.nodes_string(indent=3))
-            start_node_str = input('\nWhich position should be empty to start with? ')
-            try:
-                start_node = new_pyramid.node_from_node_str(start_node_str)
-                new_pyramid.setup_game_board_from_initial_node(start_node)
-                valid_start_node = True
-            except Exception:
-                print( \
-                    "\n"
-                    "Error!! Invalid Entry - must be 1-9 or a-f")
-        print( \
-            '\n'
-            'All Nodes but "{}" filled with a peg. Begin!'
-            .format(start_node_str))
+
+        if start_board is None:
+            ## Setup the game board
+            new_pyramid = PegPyramid()
+            valid_start_node = False
+            while valid_start_node == False:
+                print(new_pyramid.nodes_string(indent=3))
+                start_node_str = input('\nWhich position should be empty to start with? ')
+                try:
+                    start_node = new_pyramid.node_from_node_str(start_node_str)
+                    new_pyramid.setup_game_board_from_initial_node(start_node)
+                    valid_start_node = True
+                except Exception:
+                    print( \
+                        "\n"
+                        "Error!! Invalid Entry - must be 1-9 or a-f")
+            print( \
+                '\n'
+                f'All Nodes but "{start_node_str}" filled with a peg. Begin!')
+        else:
+            new_pyramid = PegPyramid(board_id=PyramidId.make(start_board))
+            print( \
+                '\n'
+                'Starting Board setup from command line. Begin!')
         print(new_pyramid.node_and_pegs_string(indent))
         return new_pyramid
 
@@ -114,11 +136,13 @@ def main():
             {string} -- output for the console for execution of the command
         """
         outstr = ''
+        
         if command == 'analyze':
-            results = pyramid.analyze_current_game_board()
+            results = analyzer.analyze_game_board(pyramid.board_id)
+            pyramid.valid_moves
             outstr += (  #
                 '\n'
-                'Need to print results of analysis!!!\n'
+                'Need to do something with results of analysis!!!\n'
                 '\n'
             )
         elif isinstance(command, PegNodeLink):
@@ -127,11 +151,7 @@ def main():
                 '\n'
                 '  Peg in {} jumped to {}, removing {}'
                 '\n'  #
-                .format(
-                    command.start,
-                    command.end,
-                    command.adjacent,
-                )
+                .format(command.start, command.end, command.adjacent)
             )
             outstr += pyramid.node_and_pegs_string(indent=3)
         else:
@@ -140,10 +160,12 @@ def main():
 
     ### START OF MAIN FUNCTION ###
     indent = 3
-    print("Running Pegs Game...")
+    configs = parse_args()
 
     ## Begin play
-    pyramid = setup_new_game()
+    print("Running Pegs Game...")
+    pyramid = setup_new_game(start_board=configs.start_board)
+    analyzer = PegPyramidAnalyzer()
     available_moves = True
     while available_moves:
         ## TODO: clean this up in the future so we don't reanalyze the moves if we didn't change the board
